@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const port = 5000;
 const userRouter = require('./routers/userrouter');
+const blogRouter = require('./routers/blogRouter');
 
 const cors = require('cors');
 
@@ -12,6 +13,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/user', userRouter);
+app.use('/blog', blogRouter);
 
 
 
