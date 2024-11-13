@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 const port = 5000;
-const userRouter = require('./routers/userrouter');
+const userRouter = require('./routers/userRouter');
 const blogRouter = require('./routers/blogRouter');
+const compRouter = require('./routers/compRouter');
 
 const cors = require('cors');
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use('/user', userRouter);
 app.use('/blog', blogRouter);
+app.use('/comp', compRouter);
 
 
 

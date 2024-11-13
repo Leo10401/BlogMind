@@ -4,9 +4,10 @@ const blogSchema = new Schema({
     title: String,
     content: String,
     author: { type: Types.ObjectId, ref: 'user' },
-    category: { type : String },
+    category: { type: String },
+    description: { type: String},
     image: String,
-    tags: String,
+    tags: Array,
     createdAt: { type: Date, default: Date.now }
 
 });

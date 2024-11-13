@@ -43,7 +43,19 @@ a {
 	margin: 15px 0;
 }
 
-button {
+.hola {
+	border-radius: 20px;
+	border: 1px solid #FF4B2B;
+	background-color: #FF4B2B;
+	color: #FFFFFF;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 12px 45px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	transition: transform 80ms ease-in;
+}
+.ghost {
 	border-radius: 20px;
 	border: 1px solid #FF4B2B;
 	background-color: #FF4B2B;
@@ -56,15 +68,21 @@ button {
 	transition: transform 80ms ease-in;
 }
 
-button:active {
+.hola:active {
+	transform: scale(0.95);
+}
+.ghost:active {
 	transform: scale(0.95);
 }
 
-button:focus {
+.hola:focus {
+	outline: none;
+}
+.ghost:focus {
 	outline: none;
 }
 
-button.ghost {
+.ghost {
 	background-color: transparent;
 	border-color: #FFFFFF;
 }

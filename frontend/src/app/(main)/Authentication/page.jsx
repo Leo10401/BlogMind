@@ -35,7 +35,7 @@ const App = () => {
     onSubmit: (values, { resetForm }) => {
       console.log(values);
 
-      axios.post('http://localhost:5000/user/add', values)
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/add`, values)
         .then((result) => {
           toast.success('User  created successfully');
         }).catch((err) => {
@@ -151,7 +151,7 @@ const App = () => {
                 onChange={signupForm.handleChange}
                 value={signupForm.values.password}
               />
-              <button type='button' onClick={() => setPasswordHidden(!passwordHidden)}>
+              <button type='button' className='hola' onClick={() => setPasswordHidden(!passwordHidden)}>
                 {passwordHidden ? 'Show' : 'Hide'}
               </button>
               {signupForm.touched.password && (
@@ -160,7 +160,7 @@ const App = () => {
 
             </div>
 
-            <button type="submit">Sign Up</button>
+            <button className='hola' type="submit">Sign Up</button>
           </form>
         </div>
 
@@ -200,7 +200,7 @@ const App = () => {
             </div>
             <a href="#">Forgot your password?</a>
 
-            <button type='submit'>Sign In</button>
+            <button className='hola' type='submit'>Sign In</button>
           </form>
         </div>
         <div className="overlay-container">
