@@ -21,7 +21,6 @@ const ViewComp = () => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         fetchCompData();
     }, []);
