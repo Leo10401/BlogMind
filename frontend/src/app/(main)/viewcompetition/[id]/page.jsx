@@ -9,10 +9,13 @@ const ViewComp = () => {
     const [compData, setCompData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const token = localStorage.getItem('token');
+
+    
 
     const fetchCompData = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/comp/getbyid/`+id);
+            const res = await axios.get(`http://localhost:5000/comp/getbyid/` + id);
             const data = res.data;
             setCompData(data);
         } catch (err) {
@@ -21,14 +24,55 @@ const ViewComp = () => {
             setLoading(false);
         }
     };
+
+    const fetchBlog = async () => {
+        try {
+            const res = await axios.get(`http://localhost:5000/blog/getbyuser`, {
+                headers: {
+                    'x-auth-token' : token
+                }
+            });
+            const data = res.data;
+            console.log(data);
+            
+            // setCompData(data);
+        } catch (err) {
+            setError("Failed to fetch data");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const addParticipation = () => {
+
+        axios.post('http://localhost:5000/part/add', {
+            blog: '',
+            competition: id
+        }, {
+            headers: {
+
+            }
+        })
+            .then((result) => {
+                toast.success('blog posted successfully');
+            }).catch((err) => {
+                console.log(err);
+                toast.error(err?.response?.data?.message || 'Something went wrong');
+            });
+    }
+
+
+
     useEffect(() => {
         fetchCompData();
+        fetchBlog();
     }, []);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
-    return  (
+    return (
         <div>
             <section className="text-gray-600 body-font overflow-hidden">
                 <div className="contain-none px-5 py-24 mx-auto">
@@ -57,17 +101,17 @@ const ViewComp = () => {
                                                 </div>
                                             }
                                         >
-                                        <Card>
-                                            <CardBody>
-                                                {compData.description}
-                                            </CardBody>
-                                        </Card></Tab>
+                                            <Card>
+                                                <CardBody>
+                                                    {compData.description}
+                                                </CardBody>
+                                            </Card></Tab>
                                         <Tab
                                             key="music"
                                             title={
                                                 <div className="flex items-center space-x-2">
                                                     <span>blogs</span>
-                                                    
+
                                                 </div>
                                             }
                                         />

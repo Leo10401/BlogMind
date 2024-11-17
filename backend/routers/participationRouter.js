@@ -1,12 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const Model = require('../models/blogmodel.js');
-const verifyToken = require('./verifyToken.js');
+const Model = require('../models/participationmodel.js');
 
+router.post('/add', (req, res) => {
 
-
-router.post('/add', verifyToken, (req, res) => {
-    req.body.author = req.user._id;
     console.log(req.body);
 
     new Model(req.body).save()
@@ -16,36 +13,15 @@ router.post('/add', verifyToken, (req, res) => {
         .catch((err) => {
             console.log(err);
             if (err.code === 11000) {
-                res.status(500).json({ message: 'blog Already Exists' });
+                res.status(500).json({ message: 'Data already exist' });
             } else {
                 res.status(500).json({ message: 'Internal Server Error' });
             }
         });
 });
 
-router.get('/getall', (req, res) => {
-
-    Model.find()
-        .then((result) => {
-            res.status(200).json(result);
-        }).catch((err) => {
-            console.log(err);
-            res.status(500).json(err);
-        });
-});
-
-router.get('/getbytitle', (req, res) => {
-    Model.findOne({ title: req.params.title })
-        .then((result) => {
-            res.status(200).json(result);
-        }).catch((err) => {
-            console.log(err);
-            res.status(500).json(err);
-        });
-});
-
-router.get('/getbytags', (req, res) => {
-    Model.findOne({ tags: req.params.tags })
+router.get('/getbycompetition', (req, res) => {
+    Model.findOne({ competition: req.params.competition })
         .then((result) => {
             res.status(200).json(result);
         }).catch((err) => {
@@ -64,8 +40,19 @@ router.get('/getbyid/:id', (req, res) => {
         });
 });
 
-router.get('/getbyuser/:id', verifyToken, (req, res) => {
-    Model.find({user : req.user._id})
+router.delete('/delete/:id',  (req, res) => {
+    Model.findByIdAndDelete(req.params.id)
+        .then((result) => {
+            res.status(200).json(result);
+        }).catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
+
+router.get('/getall', (req, res) => {
+
+    Model.find()
         .then((result) => {
             res.status(200).json(result);
         }).catch((err) => {

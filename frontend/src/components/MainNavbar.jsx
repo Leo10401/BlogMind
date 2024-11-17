@@ -2,7 +2,7 @@
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Input, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar } from "@nextui-org/react";
 import { AcmeLogo } from "./AcmeLogo.jsx";
 import { useRouter } from 'next/navigation';
-import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
+import {Modal, ModalContent, Button, useDisclosure} from "@nextui-org/react";
 import App from "@/app/(main)/authentication/page.jsx";
 
 const MainNavbar = () => {
@@ -83,10 +83,10 @@ const MainNavbar = () => {
           }
         }}
       >
-        <ModalContent>
+        <ModalContent className="width[100px] h-auto">
           {(onClose) => (
-            <>
-              <App/>          </>
+            <div className="">
+              <App/>          </div>
           )}
         </ModalContent>
       </Modal>

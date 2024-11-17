@@ -12,6 +12,8 @@ const Addblog = () => {
 
   const [previewUrl, setPreviewUrl] = useState([]);
 
+  const token = localStorage.getItem('token');
+
   const [blogContent, setBlogContent] = useState('# Write your blog here...');
 
   const [tags, setTags] = useState([]);
@@ -29,7 +31,11 @@ const Addblog = () => {
       values.content = blogContent;
       console.log(values);
 
-      axios.post('http://localhost:5000/blog/add', values)
+      axios.post('http://localhost:5000/blog/add', values, {
+        headers: {
+          'x-auth-token' : token
+        }
+      })
         .then((result) => {
           toast.success('blog posted successfully');
         }).catch((err) => {
