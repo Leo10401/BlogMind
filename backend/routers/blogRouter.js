@@ -64,8 +64,8 @@ router.get('/getbyid/:id', (req, res) => {
         });
 });
 
-router.get('/getbyuser/:id', verifyToken, (req, res) => {
-    Model.find({user : req.user._id})
+router.get('/getbyuser', verifyToken, (req, res) => {
+    Model.find({ author: req.user._id })
         .then((result) => {
             res.status(200).json(result);
         }).catch((err) => {

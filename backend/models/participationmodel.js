@@ -7,4 +7,4 @@ const partSchema = new Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = model('part', partSchema);
+module.exports = model('participations', partSchema);
