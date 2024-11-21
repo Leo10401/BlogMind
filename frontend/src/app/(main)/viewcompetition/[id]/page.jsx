@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Tabs, Tab, Card, CardBody, user} from "@nextui-org/react";
+import { Tabs, Tab, Card, CardBody, user } from "@nextui-org/react";
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import {Select, SelectItem} from "@nextui-org/react";
+import { Select, SelectItem } from "@nextui-org/react";
 
 const ViewComp = () => {
     const { id } = useParams();
@@ -51,20 +51,20 @@ const ViewComp = () => {
     const addParticipation = async () => {
 
 
-        if(!selBlog){
+        if (!selBlog) {
             toast.error('Please select a blog to participate');
             return;
         }
 
         const res = await axios.post('http://localhost:5000/part/check-participation', {
-            blog : selBlog
+            blog: selBlog
         }, {
             headers: {
                 'x-auth-token': token
             }
         });
 
-        if(res.status !== 404){
+        if (res.status !== 404) {
             toast.error('participation already exists');
             return;
         }
@@ -93,7 +93,7 @@ const ViewComp = () => {
     }, []);
 
     if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
+    // if (error) return <div>{error}</div>;
 
     return (
         <div>
@@ -139,27 +139,33 @@ const ViewComp = () => {
                                         />
                                     </Tabs>
                                 </div>
-                                <div className="flex">
+                                {
+                                    token ? (
+                                        <h1>Please Login to participate</h1>
+                                    ) : (
+                                        <div className="flex">
 
 
-                                    <Select 
-                                        label="Select a Blog" 
-                                        className="max-w-xs" 
-                                        onChange={e => setSelBlog(e.target.value)}
-                                    >
-                                        {userBlogs.map(blog => (
-                                        <SelectItem key={blog._id} value={blog._id}>
-                                            {blog.title}
-                                        </SelectItem>
-                                        ))}
-                                    </Select>
-                                    <button className="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded" type='submit' onClick={addParticipation}>take part</button>
-                                    <button className="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
-                                        <svg fill="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="w-5 h-5" viewBox="0 0 24 24">
-                                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06  1.06a5.5 5.5 0 007.78 0L12 12.33l1.06 1.06a5.5 5.5 0 007.78-7.78l-1.06-1.06z" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                            <Select
+                                                label="Select a Blog"
+                                                className="max-w-xs"
+                                                onChange={e => setSelBlog(e.target.value)}
+                                            >
+                                                {userBlogs.map(blog => (
+                                                    <SelectItem key={blog._id} value={blog._id}>
+                                                        {blog.title}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <button className="flex ml-auto text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded" type='submit' onClick={addParticipation}>take part</button>
+                                            <button className="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
+                                                <svg fill="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="w-5 h-5" viewBox="0 0 24 24">
+                                                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06  1.06a5.5 5.5 0 007.78 0L12 12.33l1.06 1.06a5.5 5.5 0 007.78-7.78l-1.06-1.06z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )
+                                }
                             </div>
                             <img alt={compData.image} className="lg:w-1/2 w-full lg:h-auto h-64 object-cover object-center rounded" src={compData.image} />
                         </div>
