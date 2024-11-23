@@ -140,7 +140,7 @@ const ViewComp = () => {
                                     </Tabs>
                                 </div>
                                 {
-                                    token ? (
+                                    !token ? (
                                         <h1>Please Login to participate</h1>
                                     ) : (
                                         <div className="flex">
