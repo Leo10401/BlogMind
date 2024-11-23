@@ -1,5 +1,6 @@
 'use client'
 import axios from 'axios';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 
@@ -40,7 +41,7 @@ const Competitions = () => {
         <div class=" md:mb-0 mb-6 flex-shrink-0 flex flex-col">
           <span class="font-semibold title-font text-gray-700">   
              <div className="flex items-center justify-around bg-black h-10 rounded-lg shadow-md shadow-black/35 shadow-black/50">
-             <button  className="flex items-center justify-center  h-10 rounded-full bg-transparent text-white transition-transform ease-in-out duration-300 hover:-translate-y-1">
+             <button   className="flex items-center justify-center  h-10 rounded-full bg-transparent text-white transition-transform ease-in-out duration-300 hover:-translate-y-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="1em"
@@ -59,6 +60,15 @@ const Competitions = () => {
         <div class="md:flex-grow mx-10">
           <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 ">{compet.name}</h2>
           <p class="leading-relaxed">{compet.description}</p>
+        </div>
+        <div>
+        <Link href={'/updatecomp/' +compet._id} className="cursor-pointer transition-all mr-10
+        bg-gray-700 text-white px-6 py-2 rounded-lg
+        border-green-400
+        border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
+        active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow-xl hover:shadow-green-300 shadow-green-300 active:shadow-none">
+          Update
+        </Link>
         </div>
         <div>
           <button onClick={() => deletecomp(compet._id)} className="group relative flex h-14 w-14 flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-red-800 bg-red-400 hover:bg-red-600">
