@@ -58,11 +58,11 @@ const Competitions = () => {
           <span class="mt-1 text-gray-500 text-sm">{compet.startdate}</span>
         </div>
         <div class="md:flex-grow mx-10">
-          <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 ">{compet.name}</h2>
+          <h2 class="text-2xl font-medium text-gray-900 title-font mb-2 ">{compet.title}</h2>
           <p class="leading-relaxed">{compet.description}</p>
         </div>
         <div>
-        <Link href={'/updatecomp/' +compet._id} className="cursor-pointer transition-all mr-10
+        <Link href={'/admin/updatecomp/' +compet._id} className="cursor-pointer transition-all mr-10
         bg-gray-700 text-white px-6 py-2 rounded-lg
         border-green-400
         border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]

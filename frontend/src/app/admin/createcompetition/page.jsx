@@ -17,7 +17,7 @@ const Competition = () => {
       lastdate: '',
     },
     onSubmit: (values, { resetForm }) => {
-      values.lastdate = deadline;
+      // values.lastdate = deadline;
       console.log(values);
 
       axios.post('http://localhost:5000/comp/add', values)
@@ -81,7 +81,7 @@ const Competition = () => {
                 </>
               </>
               <div className="flex flex-col flex-1 gap-5">
-                
+
                 <input
                   type="text"
                   id="title"
@@ -90,21 +90,22 @@ const Competition = () => {
                   value={compete.values.title}
                   className="border rounded p-2"
                 />
-                <input 
-                type="date" 
-                id='lastdate' 
-                value={deadline} 
-                onChange={(e) => setDeadline(e.target.value)}  
+                <input
+                  type="date"
+                  id='lastdate'
+                  value={compete.values.lastdate}
+                  onChange={compete.handleChange}
                 />
-               
-                  <textarea
-                    type="text"
-                    id="description"
-                    placeholder="Description"
-                    onChange={compete.handleChange}
-                    value={compete.values.description}
-                    className="border rounded p-2"
-                  />
+
+                <textarea
+                  type="text"
+                  id="description"
+                  placeholder="Description"
+                  onChange={compete.handleChange}
+                  value={compete.values.description}
+                  className="border rounded p-2"
+                />
+
                 <button type="submit" className="bg-blue-500 text-white rounded p-2">
                   Save changes
                 </button>
