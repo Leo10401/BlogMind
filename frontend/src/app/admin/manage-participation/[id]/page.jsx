@@ -1,9 +1,9 @@
 'use client'
 import axios from 'axios';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
-
-const manageParticipant = () => {
+const Participant = () => {
+  const [Participants, setParticipants] = useState([])
   const fetchpartcipantData = async () =>{
     const res = await axios.get('http://localhost:5000/part/getbycompetition' + id)
     const data = res.data;
@@ -24,11 +24,6 @@ const manageParticipant = () => {
 
 
       }
-    const viewblog = ()=> {
-      axios.get('http://localhost:')
-    }
-
-
   
   return (
     <div>
@@ -37,11 +32,11 @@ const manageParticipant = () => {
           <div className="container px-5 py-24 mx-auto">
             <div className="-my-8 divide-y-2 divide-gray-100">
             {
-            manageParticipant.map((participant, index) => ( 
+            Participants.map((Participant, index) => ( 
               <div className="py-8 flex flex-wrap md:flex-nowrap">
                 <div className="md:w-64 md:mb-0 mb-6 flex-shrink-0 flex flex-col">
                   <span className="font-semibold title-font text-gray-700"></span>
-                  <span className="mt-1 text-gray-500 text-sm">12 Jun 2019</span>
+                  <span className="mt-1 text-gray-500 text-sm">{Participants.user}</span>
                 </div>
                 <div className="md:flex-grow">
                   <h2 className="text-2xl font-medium text-gray-900 title-font mb-2">Bitters hashtag waistcoat fashion axe chia unicorn</h2>
@@ -62,4 +57,4 @@ const manageParticipant = () => {
   )
 }
 
-export default manageParticipant
+export default Participant
