@@ -63,12 +63,12 @@ router.get('/getall', (req, res) => {
 });
 
 router.post('/check-participation', verifyToken, (req, res) => {
-    const { blog } = req.body;
+    const { comp } = req.body;
     const { _id } = req.user;
-    Model.findOne({ blog: blog, user: _id })
+    Model.findOne({ competition: comp, user: _id })
         .then((result) => {
             if (result) return res.status(200).json(result);
-            else return res.status(404).json({ message: 'participation not found' });
+            else return res.status(203).json({ message: 'participation not found' });
         }).catch((err) => {
             console.log(err);
             res.status(500).json(err);

@@ -57,14 +57,14 @@ const ViewComp = () => {
         }
 
         const res = await axios.post('http://localhost:5000/part/check-participation', {
-            blog: selBlog
+            comp: compData._id
         }, {
             headers: {
                 'x-auth-token': token
             }
         });
 
-        if (res.status !== 404) {
+        if (res.status === 200) {
             toast.error('participation already exists');
             return;
         }
