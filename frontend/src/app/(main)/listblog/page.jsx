@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { formatDistance } from 'date-fns';
 import './style.css'
+import Link from 'next/link';
 
 const bloglist = () => {
   const [blogList, setblogList] = useState([]);
@@ -35,7 +36,7 @@ const bloglist = () => {
             {
               blogList.map((blog, index) => (
 
-                <div className="p-4 md:w-1/3">
+                <Link href={'/blog/' + blog._id} className="p-4 md:w-1/3">
 
                   <div className="h-full border-2 border-gray-200 border-opacity-60 bg-white rounded-lg overflow-hidden z-20">
                     <span className="  flex flex-wrap items-end">{formatDistance(new Date(blog.createdAt).toDateString(), new Date(), { addSuffix: true })}</span>
@@ -65,7 +66,7 @@ const bloglist = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
     
               }

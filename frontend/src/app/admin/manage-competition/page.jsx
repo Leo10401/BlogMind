@@ -11,7 +11,6 @@ const Competitions = () => {
     const data = res.data;
     console.log(data);
     setCompetitions(data);
-
   }
   useEffect(() => {
     fetchCompData();
