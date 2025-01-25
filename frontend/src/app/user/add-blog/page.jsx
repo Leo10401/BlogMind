@@ -4,20 +4,19 @@ import '@wordpress/components/build-style/style.css';
 import '@wordpress/block-editor/build-style/style.css';
 import axios from 'axios';
 import { useFormik } from 'formik'
-import JoditEditor from 'jodit-react';
+import { Editable, useEditor } from "@wysimark/react"
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
+import JoditEditor, { Jodit } from 'jodit-react';
 
 const Addblog = () => {
-
-  const [previewUrl, setPreviewUrl] = useState([]);
+  const code = `# title\n\nHello World!\n\n`;
+  const [previewUrl, setPreviewUrl] = useState(['']);
 
   const token = localStorage.getItem('token');
 
-  const [blogContent, setBlogContent] = useState('# Write your blog here...');
-
+  const [blogContent, setBlogContent] = useState(code);
   const [tags, setTags] = useState([]);
-
   const blogForm = useFormik({
     initialValues: {
       title: '',
@@ -45,6 +44,7 @@ const Addblog = () => {
       resetForm();
     }
   });
+
 
 
   const uploadfile = (e) => {
@@ -109,6 +109,7 @@ const Addblog = () => {
                   <input id="title" onChange={blogForm.handleChange} value={blogForm.values.title} type="text" className="border py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Enter project name"
                   />
                 </div>
+                
 
 
                 <div className="space-y-2">
@@ -154,7 +155,7 @@ const Addblog = () => {
                   </label>
                   <select id="category" onChange={blogForm.handleChange} value={blogForm.values.category} className="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
                     <option selected>Select a category</option>
-                    <option>TechnologyL</option>
+                    <option>Technology</option>
                     <option>Education</option>
                     <option>Entertainment</option>
                     <option>Food & Drink</option>
@@ -172,15 +173,32 @@ const Addblog = () => {
                   <textarea id="description" onChange={blogForm.handleChange} value={blogForm.values.description} className="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows={6} placeholder="A detailed summary will better explain your products to the audiences. Our users will see this in your dedicated product page." defaultValue={""} />
                 </div>
 
-               
-
                 <JoditEditor
-                      value={blogContent}
-                      
-                      tabIndex={1} // tabIndex of textarea			
-                      onChange={setBlogContent}
-                      style={{ width: '100%', height: '700%' }}
-                    />  
+  value={blogContent}
+  config={{
+    uploader: {
+      insertImageAsBase64URI: true, // Allows image insertion as Base64
+      url: 'https://api.cloudinary.com/v1_1/de4osq89e/image/upload', // Cloudinary upload URL
+      isSuccess: (response) => {
+        const uploadedUrl = response.data.url; // Extract uploaded image URL
+        setBlogContent((prevContent) => `${prevContent}<img src="${uploadedUrl}" alt="uploaded image"/>`);
+        toast.success('Image uploaded successfully');
+      },
+      error: (err) => {
+        console.error('Upload Error:', err);
+        toast.error('Image upload failed');
+      },
+    },
+    height: 400, // Set the editor height
+    spellcheck: true, // Enable spellcheck
+    toolbar: true, // Show toolbar
+    readonly: false, // Enable editing
+// Custom buttons in the toolbar
+    placeholder: 'Start writing your blog content here...',
+  }}
+  onBlur={(newContent) => setBlogContent(newContent)} // Save the edited content on blur
+/>
+
 
                   
 

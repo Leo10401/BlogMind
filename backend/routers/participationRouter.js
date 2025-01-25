@@ -22,7 +22,7 @@ router.post('/add', verifyToken, (req, res) => {
 });
 
 router.get('/getbycompetition/:competition', (req, res) => {
-    Model.find({ competition: req.params.competition }).populate('user')
+    Model.find({ competition: req.params.competition }).populate('blog').populate('user')
         .then((result) => {
             res.status(200).json(result);
         }).catch((err) => {

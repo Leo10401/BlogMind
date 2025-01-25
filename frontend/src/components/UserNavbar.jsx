@@ -3,44 +3,116 @@ import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Input, DropdownIt
 import { AcmeLogo } from "./AcmeLogo.jsx";
 import { SearchIcon } from "./SearchIcon.jsx";
 import { useRouter } from 'next/navigation';
+import useAppContext from "@/context/AppContext.jsx";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const UserNavbar = () => {
 
   const router = useRouter();
 
+
+  const { userLoggedIn, logout, email } = useAppContext();
+  const [personalData, setpersonalData] = useState([]);
+  const fetchpersonalData = async () => {
+    const res = await axios.get(`http://localhost:5000/user/getbyemail/` + email);
+    const data = res.data;
+    console.log(data);
+    setpersonalData(data)
+  }
+
+  useEffect(() => {
+    fetchpersonalData();
+  }, []);
+
+  const showLoginOptions = () => {
+    if (userLoggedIn) { 
+      return (
+      <NavbarContent as='div'  className="items-center" justify="end">
+
+      <Dropdown placement="bottom-end" className="text-black">
+        <DropdownTrigger>
+          <Avatar
+            isBordered
+            as="button"
+            className="transition-transform"
+            color="primary"
+            name="Jason Hughes"
+            size="sm"
+            src={personalData.avatar} alt="https://imgs.search.brave.com/4pQHXz65KDgDjM0lMYhZRwtXX_SVX8YvGF86T2OOPjg/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYxL2Y3/LzVlLzYxZjc1ZWE5/YTY4MGRlZjJlZDFj/NjkyOWZlNzVhZWVl/LmpwZw"
+          />
+        </DropdownTrigger>
+        <DropdownMenu aria-label="Profile Actions" variant="flat">
+          <DropdownItem key="profile" className="h-14 gap-2">
+            <p className="font-semibold text-black">Signed in as</p>
+            <p className="font-semibold">{email}</p>
+          </DropdownItem>
+          <DropdownItem href='/user/Dashboard/' key="settings">My Settings</DropdownItem>
+          <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+          <DropdownItem onClick={logout} key="logout" color="danger">
+            Log Out
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+      <div
+  class="flex justify-center items-center bg-[#1c1f2f] rounded-lg pl-3 gap-3 w-24 h-14 font-sans"
+>
+  <div class="flex items-center justify-center w-16">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="w-10">
+                <circle cx={100} cy={100} r={95} fill="maroon" stroke="darkgoldenrod" strokeWidth={5} />
+                <circle cx={100} cy={100} r={70} fill="lightgoldenrodyellow" />
+                <path d="M100 30 L110 80 L170 85 L120 120 L130 170 L100 140 L70 170 L80 120 L30 85 L90 80 Z" fill="black" stroke="darkgoldenrod" strokeWidth={2} />
+                <circle cx={100} cy={100} r={98} fill="none" stroke="yellow" strokeWidth={3} opacity="0.5" />
+              </svg>
+  </div>
+
+  <div class="flex flex-col items-start w-[120px]">
+    <p class="text-[13.5px] text-white font-semibold tracking-[0.5px]">
+      <span id="currency"></span>{personalData.coins}
+    </p>
+  </div>
+</div>
+
+
+    </NavbarContent>)
+    } else {
+      return <Link href="/authentication">Login</Link>
+    }
+  }
+
   return (
     <Navbar isBordered>
       <NavbarContent justify="start" className="flex text-center">
-        <NavbarBrand className="mr-4">
-          <AcmeLogo />
-          <p className="hidden sm:block font-bold text-inherit text-start">ACME</p>
-        </NavbarBrand>
+       
+          <Link className="mr-4" href="/"><AcmeLogo />
+          </Link>
+          <Link href="/" className="hidden sm:block font-bold text-inherit text-start">ACME</Link>
+        
         <NavbarContent className="hidden sm:flex gap-12">
           <NavbarItem>
-            <Link color="foreground" href="#">
+            <Link color="foreground" href="/Features">
               Features
             </Link>
           </NavbarItem>
           <NavbarItem isActive>
-            <Link href="#" aria-current="page" color="secondary">
-              Customers
+            <Link href="/competition" aria-current="page" color="Competition">
+              Competition
             </Link>
           </NavbarItem>
-          <NavbarItem>
-            <Link color="foreground" href="#">
-              Integrations
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <button
+          <NavbarItem isActive>
+           <Link href="/user/add-blog/" color="foreground" aria-current="page">Add blog
+              <button 
               onClick={() => { router.push("/user/add-blog") }}
               title="Add New"
               class="group cursor-pointer outline-none hover:rotate-90 duration-300"
             >
+              
+              
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="30px"
-                height="30px"
+                width="40px"
+                height="20px"
+
                 viewBox="0 0 24 24"
                 class="stroke-zinc-400 fill-none group-hover:fill-green-100 group-active:stroke-zinc-200 group-active:fill-zinc-600 group-active:duration-0 duration-300"
               >
@@ -52,53 +124,15 @@ const UserNavbar = () => {
                 <path d="M12 16V8" stroke-width="1.5"></path>
               </svg>
             </button>
-
-          </NavbarItem>
+            </Link>
+          </NavbarItem>      
+          
+       
+      {showLoginOptions()}
         </NavbarContent>
       </NavbarContent>
 
-      <NavbarContent as="div" className="items-center" justify="end">
-        <Input
-          classNames={{
-            base: "max-w-full sm:max-w-[10rem] h-10",
-            mainWrapper: "h-full",
-            input: "text-small",
-            inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-          }}
-          placeholder="Type to search..."
-          size="sm"
-          startContent={<SearchIcon size={18} />}
-          type="search"
-        />
-        <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <Avatar
-              isBordered
-              as="button"
-              className="transition-transform"
-              color="secondary"
-              name="Jason Hughes"
-              size="sm"
-              src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-            />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">zoey@example.com</p>
-            </DropdownItem>
-            <DropdownItem key="settings">My Settings</DropdownItem>
-            <DropdownItem key="team_settings">Team Settings</DropdownItem>
-            <DropdownItem key="analytics">Analytics</DropdownItem>
-            <DropdownItem key="system">System</DropdownItem>
-            <DropdownItem key="configurations">Configurations</DropdownItem>
-            <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-            <DropdownItem key="logout" color="danger">
-              Log Out
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </NavbarContent>
+
     </Navbar>
   );
 }

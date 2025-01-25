@@ -1,3 +1,4 @@
+'use client';
 const { useRouter } = require("next/navigation");
 const { createContext, useState, useContext } = require("react");
 
@@ -8,7 +9,11 @@ export const AppProvider = ({ children }) => {
     const router = useRouter();
 
     const [userLoggedIn, setUserLoggedIn] = useState(
-        JSON.parse(localStorage.getItem("token")) || false
+        localStorage.getItem("token",) || false
+    );
+
+    const [email, setEmail] = useState(
+        localStorage.getItem("email") || ''
     );
 
     const logout = () => {
@@ -17,7 +22,7 @@ export const AppProvider = ({ children }) => {
         router.push('/authentication');
     }
 
-    return <AppContext.Provider value={{ userLoggedIn, setUserLoggedIn, logout }}>
+    return <AppContext.Provider value={{ userLoggedIn, setUserLoggedIn, logout, email, setEmail }}>
         {children}
     </AppContext.Provider>
 

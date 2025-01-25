@@ -50,6 +50,8 @@ router.post('/send-otp', (req, res) => {
 
     const { recipient } = req.body;
     const otp = generateNewOTP();
+    console.log(otp);
+    
     generatedOTP[recipient] = otp;
 
     const mailDetails = {
@@ -63,6 +65,16 @@ router.post('/send-otp', (req, res) => {
         res.status(200).json(info);
     })
 
+})
+
+router.post('/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+    
+    if (generatedOTP[email] === otp) {
+        res.status(200).json({ message: "OTP Verified" });
+    }else{
+        res.status(400).json({ message: "Invalid OTP" });
+    }
 })
 
 module.exports = router;

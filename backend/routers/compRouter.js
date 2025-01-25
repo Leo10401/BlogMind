@@ -32,7 +32,7 @@ router.put('/update/:id', (req, res) => {
 
 
 router.get('/getbyid/:id', (req, res) => {
-    Model.findById(req.params.id)
+    Model.findById(req.params.id).populate('winner')
         .then((result) => {
             res.status(200).json(result);
         }).catch((err) => {
