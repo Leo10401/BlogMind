@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import axios from 'axios';
+import { FiHome, FiBarChart2, FiLogOut } from "react-icons/fi";
 
 const Competition = () => {
   const [deadline, setDeadline] = useState('');
@@ -55,7 +56,10 @@ const Competition = () => {
   }
 
   return (
-    <div className='flex justify-center h-screen m-3'>
+                <div className='flex flex-row'> 
+
+
+    <div className='flex justify-center h-screen m-3 w-auto'>
       <div className='border w-11/12 border-gray-300'>
         <form onSubmit={compete.handleSubmit}>
           <div className="bg-white p-10 rounded-lg shadow-lg">
@@ -115,6 +119,7 @@ const Competition = () => {
         </form>
       </div>
     </div>
+                </div>
   );
 };
 

@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import "./style.css";
 import { useRouter } from 'next/navigation';
 import useAppContext from '@/context/AppContext';
+import { GoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
 
 const SignupSchema = Yup.object().shape({
   name: Yup.string().required('Name is required')
@@ -21,12 +22,23 @@ const SignupSchema = Yup.object().shape({
     .matches(/\W/, 'Password must contain atleast one special character')
 });
 
+const LoginSchema = Yup.object().shape({
+  email: Yup.string()
+    .email('Invalid email')
+    .required('Email is required'),
+  password: Yup.string()
+    .min(8, 'too short - should be 8 chars minimum')
+    .matches(/[a-z]/, 'password must contain at least one lowercase letter')
+    .matches(/[A-Z]/, 'password must contain at least one uppercase letter')
+    .matches(/\d/, 'password must contain at least one number')
+    .required('Password is required')
+});
+
 const App = () => {
   const [isActive, setIsActive] = useState(false);
   const [passwordHidden, setPasswordHidden] = useState(true);
 
-  const { setUserLoggedIn, setEmail } = useAppContext();
-
+  const { setUserLoggedIn, setEmail, setRole } = useAppContext();
   const router = useRouter();
 
   const signupForm = useFormik({
@@ -48,6 +60,41 @@ const App = () => {
       resetForm();
     },
     validationSchema: SignupSchema
+  });
+
+  const loginForm = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    onSubmit: (values, { resetForm }) => {
+      console.log(values);
+
+      axios.post('http://localhost:5000/user/authenticate', values)
+        .then((result) => {
+          toast.success('Login Success');
+          setUserLoggedIn(true);
+          console.log(result.data);
+          localStorage.setItem('token', result.data.token);
+          localStorage.setItem('email', result.data.email);
+
+          // Check if the user is an admin
+          const userRole = result.data.role;
+          
+          if (userRole === 'admin') {
+            window.location.href = "/admin";
+            router.refresh();
+          } else {
+            window.location.href = "/";
+            router.refresh();
+          }
+        }).catch((err) => {
+          toast.error('Login Failed');
+          console.log(err);
+        });
+      resetForm();
+    },
+    validationSchema: LoginSchema
   });
 
   useEffect(() => {
@@ -73,46 +120,6 @@ const App = () => {
       });
     }
   }, []);
-
-  //login
-  const LoginSchema = Yup.object().shape({
-    email: Yup.string()
-      .email('Invalid email')
-      .required('Email is required'),
-    password: Yup.string()
-      .min(8, 'too short - should be 8 chars minimum')
-      .matches(/[a-z]/, 'password must contain at least one lowercase letter')
-      .matches(/[A-Z]/, 'password must contain at least one uppercase letter')
-      .matches(/\d/, 'password must contain at least one number')
-      .required('Password is required')
-  });
-
-  const loginForm = useFormik({
-    initialValues: {
-      email: '',
-      password: '',
-    },
-    onSubmit: (values, { resetForm }) => {
-      console.log(values);
-
-      axios.post('http://localhost:5000/user/authenticate', values)
-        .then((result) => {
-          toast.success('Login Success');
-          setUserLoggedIn(true);
-          console.log(result.data);
-          localStorage.setItem('token', result.data.token);
-          localStorage.setItem('email', result.data.email);
-          setEmail(result.data.email)
-          
-          router.push('/');
-        }).catch((err) => {
-          toast.error('Login Failed');
-          console.log(err);
-        });
-      resetForm();
-    },
-    validationSchema: LoginSchema
-  });
 
   return (
     <div className='mybody'>
@@ -164,16 +171,13 @@ const App = () => {
               {signupForm.touched.password && (
                 <p className='text-sm text-red-500'>{signupForm.errors.password}</p>
               )}
-
             </div>
-
             <button className='hola' type="submit">Sign Up</button>
           </form>
         </div>
 
         <div className="form-container sign-in-container">
-          <form onSubmit={loginForm.handleSubmit} >
-
+          <form onSubmit={loginForm.handleSubmit}>
             <h1>Sign in</h1>
             <div className="social-container">
               <a href="#" className="social">
@@ -203,10 +207,8 @@ const App = () => {
               {loginForm.errors.password && loginForm.touched.password ? (
                 <div className='text-red-500 text-sm'>{loginForm.errors.password}</div>
               ) : null}
-
             </div>
             <a href="#">Forgot your password?</a>
-
             <button className='hola' type='submit'>Sign In</button>
           </form>
         </div>
@@ -229,8 +231,6 @@ const App = () => {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 }

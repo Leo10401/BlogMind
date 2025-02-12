@@ -1,7 +1,7 @@
 const { Schema, model } = require('../connection');
 
 const userSchema = new Schema({
-    name: { type: String, requred: true },
+    name: { type: String, required: true },
     email: { type: String, unique: true },
     password: String,
     avatar: { type: String },

@@ -45,7 +45,7 @@ const ViewComp = () => {
 
   const fetchBlog = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/blog/getbyuser`, {
+      const res = await axios.get(`http://localhost:5000/blog/filtered-byuser`, {
         headers: {
           'x-auth-token': token
         }

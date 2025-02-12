@@ -16,8 +16,11 @@ export const AppProvider = ({ children }) => {
         localStorage.getItem("email") || ''
     );
 
+
+
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("email");
         setUserLoggedIn(false);
         router.push('/authentication');
     }

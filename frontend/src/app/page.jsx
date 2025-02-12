@@ -5,22 +5,20 @@ import {Tabs, Tab, Card, CardBody, Switch} from "@nextui-org/react";
 import Bloglist from './(main)/listblog/page';
 import Features from './Features/page';
 import Listcomp from './(main)/competition/page';
-import UserNavbar from '@/components/UserNavbar';
+
 import Links from './(main)/links/page';
+import { Navbar } from '@/components/Nav';
 
 
 const Home = () => {
   const [isVertical, setIsVertical] = React.useState(false);
   return (
     <>
-      <UserNavbar />
+    <Navbar />
     <div className="flex flex-col px-4">
-      <Switch className="mb-4" isSelected={isVertical} onValueChange={setIsVertical}>
-        Vertical
-      </Switch>
       <div className="flex w-full flex-col">
-        <Tabs aria-label="Options" isVertical={isVertical} >
-          <Tab  title="Home">
+        <Tabs aria-label="Options" className='justify-center py-4 ' >
+          <Tab   title="Home" >
             <Card >
               <CardBody>
                 <Features/>

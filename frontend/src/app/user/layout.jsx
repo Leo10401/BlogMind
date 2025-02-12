@@ -1,10 +1,11 @@
-import UserNavbar from '@/components/UserNavbar'
+import { Navbar } from '@/components/Nav'
+
 import React from 'react'
 
 const Layout = ({ children }) => {
   return (
     <>
-      <UserNavbar />
+      <Navbar />
       {children}
     </>
   )

@@ -5,33 +5,66 @@ import { formatDistance } from 'date-fns';
 import './style.css'
 import Link from 'next/link';
 import {RadioGroup, Radio} from "@heroui/react";
+import AnimatedContent from '../../../components/Animated-content';
 
-const bloglist = () => {
-  const [blogList, setblogList] = useState([]);
+
+const BlogList = () => {
+  const [blogList, setBlogList] = useState([]);
   const [masterList, setMasterList] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(new Set());
+  const [sortOption, setSortOption] = useState(''); // State for sorting option
 
-
-
-  const fetchblogData = async () => {
+  const fetchBlogData = async () => {
     const res = await axios.get('http://localhost:5000/blog/getall/');
     const data = res.data;
     console.log(data);
-    setblogList(data);
+    setBlogList(data);
     setMasterList(data);
-  }
+  };
+
   const searchBlogName = (e) => {
     const value = e.target.value;
-    const filteredblogList = masterList.filter((blog) => blog.title.toLowerCase().includes(value.toLowerCase()));
-    setblogList(filteredblogList);
-  }
+    const filteredBlogList = masterList.filter((blog) =>
+      blog.title.toLowerCase().includes(value.toLowerCase())
+    );
+    setBlogList(filteredBlogList);
+  };
 
   const filterCategory = (category) => {
-    setblogList(masterList.filter(blog => blog.category === category))
-  }
-  useEffect(() => {
-    fetchblogData();
-  }, []);
+    const updatedCategories = new Set(selectedCategories);
+    if (updatedCategories.has(category)) {
+      updatedCategories.delete(category);
+    } else {
+      updatedCategories.add(category);
+    }
+    setSelectedCategories(updatedCategories);
 
+    if (updatedCategories.size === 0) {
+      setBlogList(masterList);
+    } else {
+      const filteredBlogList = masterList.filter((blog) =>
+        updatedCategories.has(blog.category)
+      );
+      setBlogList(filteredBlogList);
+    }
+  };
+
+  const handleSortChange = (e) => {
+    const value = e.target.value;
+    setSortOption(value);
+
+    let sortedBlogList = [...blogList];
+    if (value === 'most-views') {
+      sortedBlogList.sort((a, b) => b.viewCount - a.viewCount);
+    } else if (value === 'least-views') {
+      sortedBlogList.sort((a, b) => a.viewCount - b.viewCount);
+    }
+    setBlogList(sortedBlogList);
+  };
+
+  useEffect(() => {
+    fetchBlogData();
+  }, []);
 
   return <div className='h-screen'>
     <div className='hola'>
@@ -39,10 +72,10 @@ const bloglist = () => {
       <div className="relative overflow-hidden">
           <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-24">
             <div className="text-center">
-              <h1 className="text-4xl sm:text-6xl font-bold text-gray-800 dark:text-neutral-200">
+              <h1 className="text-4xl sm:text-6xl font-bold text-black ">
                 BLOGS
               </h1>
-              <p className="mt-3 text-gray-600 dark:text-neutral-400">
+              <p className="mt-3">
                 Stay in the know with insights from industry experts.
               </p>
               <div className="mt-7 sm:mt-12 mx-auto max-w-xl relative">
@@ -120,19 +153,19 @@ const bloglist = () => {
                     <button                  
                     onClick={() => { filterCategory('Education') }}
                     className="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="#">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-backpack"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 18v-6a6 6 0 0 1 6 -6h2a6 6 0 0 1 6 6v6a3 3 0 0 1 -3 3h-8a3 3 0 0 1 -3 -3z" /><path d="M10 6v-1a2 2 0 1 1 4 0v1" /><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" /><path d="M11 10h2" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  stroke-linecap="round"  stroke-linejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-backpack"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 18v-6a6 6 0 0 1 6 -6h2a6 6 0 0 1 6 6v6a3 3 0 0 1 -3 3h-8a3 3 0 0 1 -3 -3z" /><path d="M10 6v-1a2 2 0 1 1 4 0v1" /><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" /><path d="M11 10h2" /></svg>
                       Education
                     </button>
                     <button 
                     onClick={() => { filterCategory('Entertainment') }}
                     className="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="#">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-building-carousel"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0" /><path d="M5 8m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 4m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 8m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M5 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M8 22l4 -10l4 10" /></svg>                     
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  stroke-linecap="round"  stroke-linejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-building-carousel"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0" /><path d="M5 8m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 4m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 8m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M5 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M8 22l4 -10l4 10" /></svg>                     
                       Entertainment
                     </button>
                     <button 
                     onClick={() => { filterCategory('Food & Drink') }}
                     className="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="#">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-grill"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 8h-14a6 6 0 0 0 6 6h2a6 6 0 0 0 6 -5.775l0 -.225z" /><path d="M17 20a2 2 0 1 1 0 -4a2 2 0 0 1 0 4z" /><path d="M15 14l1 2" /><path d="M9 14l-3 6" /><path d="M15 18h-8" /><path d="M15 5v-1" /><path d="M12 5v-1" /><path d="M9 5v-1" /></svg>                      
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  stroke-linecap="round"  stroke-linejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-grill"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 8h-14a6 6 0 0 0 6 6h2a6 6 0 0 0 6 -5.775l0 -.225z" /><path d="M17 20a2 2 0 1 1 0 -4a2 2 0 0 1 0 4z" /><path d="M15 14l1 2" /><path d="M9 14l-3 6" /><path d="M15 18h-8" /><path d="M15 5v-1" /><path d="M12 5v-1" /><path d="M9 5v-1" /></svg>                      
                       Food & Drink
                     </button>
                     <button 
@@ -148,7 +181,7 @@ const bloglist = () => {
                       Environment & Sustainibility
                     </button>
                     <button className="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="#">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-robot"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" /><path d="M12 2v2" /><path d="M9 12v9" /><path d="M15 12v9" /><path d="M5 16l4 -2" /><path d="M15 14l4 2" /><path d="M9 18h6" /><path d="M10 8v.01" /><path d="M14 8v.01" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  stroke-linecap="round"  stroke-linejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-robot"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" /><path d="M12 2v2" /><path d="M9 12v9" /><path d="M15 12v9" /><path d="M5 16l4 -2" /><path d="M15 14l4 2" /><path d="M9 18h6" /><path d="M10 8v.01" /><path d="M14 8v.01" /></svg>
                       Technology
                     </button>
                     <button 
@@ -160,14 +193,21 @@ const bloglist = () => {
                     <button 
                     onClick={() => { filterCategory('Lifestyle') }}
                     className="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="#">
-                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-cricket"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.105 18.79l-1 .992a4.159 4.159 0 0 1 -6.038 -5.715l.157 -.166l8.282 -8.401l1.5 1.5l3.45 -3.391a2.08 2.08 0 0 1 3.057 2.815l-.116 .126l-3.391 3.45l1.5 1.5l-3.668 3.617" /><path d="M10.5 7.5l6 6" /><path d="M14 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /></svg>
+                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  stroke-linecap="round"  stroke-linejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-cricket"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.105 18.79l-1 .992a4.159 4.159 0 0 1 -6.038 -5.715l.157 -.166l8.282 -8.401l1.5 1.5l3.45 -3.391a2.08 2.08 0 0 1 3.057 2.815l-.116 .126l-3.391 3.45l1.5 1.5l-3.668 3.617" /><path d="M10.5 7.5l6 6" /><path d="M14 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /></svg>
                       Sports & Fitness
                     </button>
                     <button 
                     onClick={() => { filterCategory('Parenting & Family') }}
                     className="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="#">
-                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-hearts"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14.017 18l-2.017 2l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 0 1 8.153 5.784" /><path d="M15.99 20l4.197 -4.223a2.81 2.81 0 0 0 0 -3.948a2.747 2.747 0 0 0 -3.91 -.007l-.28 .282l-.279 -.283a2.747 2.747 0 0 0 -3.91 -.007a2.81 2.81 0 0 0 -.007 3.948l4.182 4.238z" /></svg>                      Parenting & Family
+                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  stroke-linecap="round"  stroke-linejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-hearts"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14.017 18l-2.017 2l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 0 1 8.153 5.784" /><path d="M15.99 20l4.197 -4.223a2.81 2.81 0 0 0 0 -3.948a2.747 2.747 0 0 0 -3.91 -.007l-.28 .282l-.279 -.283a2.747 2.747 0 0 0 -3.91 -.007a2.81 2.81 0 0 0 -.007 3.948l4.182 4.238z" /></svg>                      Parenting & Family
                     </button>
+                  </div>
+                  <div >
+                    <select className='bg-neutral-800 rounded text-white p-4' value={sortOption} onChange={handleSortChange}>
+                      <option value="">Sort by</option>
+                      <option value="most-views">Most Views</option>
+                      <option value="least-views">Least Views</option>
+                    </select>
                   </div>
 
             </div>
@@ -185,28 +225,68 @@ const bloglist = () => {
             {
               blogList.map((blog, index) => (
 
-                <Link href={'/blog/' + blog._id} className="p-4 md:w-1/3">
-
-                  <div className="h-full border-2 border-gray-200 border-opacity-60 bg-white rounded-lg overflow-hidden z-20">
-                    <span className="  flex flex-wrap items-end">{formatDistance(new Date(blog.createdAt).toDateString(), new Date(), { addSuffix: true })}</span>
-                    <img className="lg:h-48 md:h-36 w-full object-cover object-center" src={blog.image} alt="blog" />
-                    <div className="p-6 hover:z-20">
-                      <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">{blog.category}</h2>
-                      <h1 className="title-font text-lg font-medium mb-3">{blog.title}</h1>
-                      <p className="leading-relaxed mb-3">{blog.description}</p>
-                      <div className="flex items-center flex-wrap ">
-                        <a className="text-purple-500 inline-flex items-center md:mb-2 lg:mb-0">Learn More
-                         
-                        </a>
-                        <span className="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
-                         
-                        </span>
-                        <span className="text-gray-400 inline-flex items-center leading-none text-sm">
-                         
-                        </span>
+                <Link href={'/blog/' + blog._id} className="p-4 md:w-1/3" key={index}>
+                  <AnimatedContent
+                    distance={150}
+                    direction="horizontal"
+                    reverse={true}
+                    config={{ tension: 80, friction: 20 }}
+                    initialOpacity={0.2}
+                    animateOpacity
+                    scale={1.1}
+                    threshold={0.2}>
+                    <div className="max-w-lg bg-white rounded-xl shadow-xl min-h-full overflow-hidden">
+                      <img src={blog.image} alt="Yoga Pose" className="w-full h-72 object-cover hover:scale-105 duration-700" />
+                      <div className="p-5">
+                        <div className="text-lg font-semibold flex flex-row justify-between">
+                          <div className=''>
+                            {blog.title}
+                          </div>
+                          <div className='flex flex-row'>
+                            <svg 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              width="24" 
+                              height="24" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              className="icon icon-tabler icons-tabler-outline icon-tabler-eye w-8 hover:scale-125 duration-200 hover:stroke-blue-500"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                              <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                            </svg>
+                            {blog.viewCount}
+                          </div>
+                        </div>
+                        <p className="text-gray-600 text-sm mt-1 h-20 overflow-hidden hover:overflow-y-scroll">
+                          {blog.description}
+                        </p>
+                        <div className='flex flex-row justify-between'>
+                          <div className="flex gap-2 mt-4">
+                            {blog.tags && blog.tags.length > 0 ? (
+                              blog.tags.map((tag, index) => (
+                                <span key={index} className="px-3 py-1 text-xs bg-gray-200 rounded-full">
+                                  {tag}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-gray-400 text-xs">No tags available</span>
+                            )}
+                          </div>
+                          <div>
+                            <br />
+                            <span className="flex flex-wrap items-end">
+                              {formatDistance(new Date(blog.createdAt).toDateString(), new Date(), { addSuffix: true })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </AnimatedContent>
                 </Link>
               ))
     
@@ -224,4 +304,4 @@ const bloglist = () => {
   </div>
 }
 
-export default bloglist
+export default BlogList

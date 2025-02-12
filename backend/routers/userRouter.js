@@ -3,6 +3,7 @@ const router = express.Router();
 const Model = require('../models/usermodel.js');
 const jwt = require('jsonwebtoken');
 const verifyToken = require('./verifyToken.js');
+const verifyAdmin = require('../utils/verifyAdmin');
 
 require('dotenv').config();
 
@@ -12,7 +13,7 @@ router.post('/add', (req, res) => {
 
     new Model(req.body).save()
         .then((result) => {
- 
+
             res.status(200).json(result);
         })
         .catch((err) => {
@@ -26,40 +27,51 @@ router.post('/add', (req, res) => {
 });
 router.post('/give-coins', async (req, res) => {
     const { userId, coins } = req.body;
-  
+
     if (!userId || !coins) return res.status(400).json({ error: "User ID and coins are required" });
-  
+
     try {
-      const user = await Model.findById(userId);
-      if (!user) return res.status(404).json({ error: "User not found" });
-  
-      user.coins += coins; // Add coins to the user's balance
-      await user.save();
-  
-      res.status(200).json({ message: "Coins added successfully", coins: user.coins });
+        const user = await Model.findById(userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        user.coins += coins; // Add coins to the user's balance
+        await user.save();
+
+        res.status(200).json({ message: "Coins added successfully", coins: user.coins });
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Internal server error" });
     }
-  });
+});
 
 
-  // Route to fetch coin balance using token
+// Route to fetch coin balance using token
 router.get('/balance', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
-  
+
     if (!token) return res.status(401).json({ error: "Unauthorized" });
-  
+
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id);
-      if (!user) return res.status(404).json({ error: "User not found" });
-  
-      res.status(200).json({ coins: user.coins });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json({ coins: user.coins });
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Internal server error" });
     }
-  });
-  
+});
+
+
+
+router.get('/admin/getall', verifyAdmin, (req, res) => {
+    Model.find()
+        .then((result) => {
+            res.status(200).json(result);
+        }).catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
 
 
 // getall
@@ -125,7 +137,7 @@ router.delete('/delete/:id', (req, res) => {
 });
 
 router.get('/getbyuser', verifyToken, (req, res) => {
-    Model.find({ author: req.user._id })
+    Model.findById(req.user._id)
         .then((result) => {
             res.status(200).json(result);
         }).catch((err) => {
@@ -140,8 +152,8 @@ router.post('/authenticate', (req, res) => {
 
             if (result) {
                 // generate token
-                const { _id, email, password } = result;
-                const payload = { _id, email, password };
+                const { _id, email, password, role } = result;
+                const payload = { _id, email, password, role };
 
                 jwt.sign(
                     payload,
@@ -153,7 +165,7 @@ router.post('/authenticate', (req, res) => {
 
                             res.status(500).json({ message: 'Token Generation Failed' });
                         } else {
-                            res.status(200).json({ token: token, email });
+                            res.status(200).json({ token: token, email, role });
                         }
                     }
                 )

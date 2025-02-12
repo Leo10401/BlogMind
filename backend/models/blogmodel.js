@@ -1,15 +1,25 @@
 const { Schema, model, Types } = require('../connection');
 
-const blogSchema = new Schema({
-    title: String,
-    content: String,
-    author: { type: Types.ObjectId, ref: 'user' },
-    category: { type: String },
-    description: { type: String},
-    image: String,
-    tags: Array,
-    createdAt: { type: Date, default: Date.now }
-
+const CommentSchema = new Schema({
+    user: { type: String, required: true },
+    avatar: { type: String, default: "https://avatar.iran.liara.run/public" },
+    text: { type: String, required: true },
+    date: { type: Date, default: Date.now },
+    likes: { type: Number, default: 0 }
 });
 
-module.exports = model('blog', blogSchema);
+const BlogSchema = new Schema({
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    author: { type: Types.ObjectId, ref: 'user', required: true },
+    category: { type: String, required: true },
+    description: { type: String },
+    image: { type: String },
+    tags: [String],
+    viewCount: { type: Number, default: 0 },
+    viewedBy: [{ type: Types.ObjectId, ref: 'user' }],
+    comments: [CommentSchema],  // **✅ Added Comment Schema**
+    createdAt: { type: Date, default: Date.now }
+});
+
+module.exports = model('blog', BlogSchema);
