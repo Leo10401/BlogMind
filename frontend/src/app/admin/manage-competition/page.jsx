@@ -1,7 +1,7 @@
 'use client';
 import axios from 'axios';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 
@@ -9,21 +9,7 @@ const Competitions = () => {
   const [competitions, setCompetitions] = useState([]);
   const [participationCount, setParticipationCount] = useState({});
 
-  useEffect(() => {
-    fetchCompData();
-  }, []);
-
-  const fetchCompData = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/comp/getall/');
-      setCompetitions(res.data);
-      fetchParticipationData(res.data.map(comp => comp._id));
-    } catch (error) {
-      console.error('Error fetching competitions:', error);
-    }
-  };
-
-  const fetchParticipationData = async (compIds) => {
+  const fetchParticipationData = useCallback(async (compIds) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/part/getall`);
       const data = res.data;
@@ -37,11 +23,25 @@ const Competitions = () => {
     } catch (error) {
       console.error('Error fetching participation data:', error);
     }
-  };
+  }, []);
+
+  const fetchCompData = useCallback(async () => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/comp/getall/`);
+      setCompetitions(res.data);
+      fetchParticipationData(res.data.map(comp => comp._id));
+    } catch (error) {
+      console.error('Error fetching competitions:', error);
+    }
+  }, [fetchParticipationData]);
+
+  useEffect(() => {
+    fetchCompData();
+  }, [fetchCompData]);
 
   const deleteCompetition = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/comp/delete/${id}`);
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/comp/delete/${id}`);
       toast.success('Competition deleted successfully');
       fetchCompData();
     } catch (error) {

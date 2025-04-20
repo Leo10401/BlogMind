@@ -18,7 +18,7 @@ export function MobileMenu({ items }) {
         const email = JSON.parse(localStorage.getItem("user"))?.email; // Get email from localStorage
         if (!email) return; // Prevent unnecessary API call
 
-        const res = await axios.get(`http://localhost:5000/user/getbyemail/${email}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyemail/${email}`);
         setPersonalData(res.data);
       } catch (error) {
         console.error("Error fetching personal data:", error);

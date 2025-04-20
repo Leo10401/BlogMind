@@ -5,7 +5,8 @@ import Profile from '../profile/page';
 import Manageblog from '../manageblog/page';
 import UpdateProfile from '../profile-upadate/page';
 
-const page = () => {
+// Changed function name from 'page' to 'Dashboard' (uppercase first letter)
+const Dashboard = () => {
   const [isVertical, setIsVertical] = React.useState(true);
   return (
     <div>
@@ -17,9 +18,7 @@ const page = () => {
         <Tabs aria-label="Options" isVertical={isVertical}>
           <Tab key="Profile"  title="Profile">
             <Card className='w-screen'>
-              
-                <Profile/>
-              
+              <Profile/>
             </Card>
           </Tab>
           <Tab key="Updateprofile" title="Update">
@@ -43,4 +42,5 @@ const page = () => {
   )
 }
 
-export default page
+// Update the export name too
+export default Dashboard;

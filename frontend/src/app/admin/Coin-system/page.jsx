@@ -10,7 +10,7 @@ const GiveCoins = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/user/give-coins', { userId, coins: parseInt(coins) });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/give-coins`, { userId, coins: parseInt(coins) });
       setMessage(response.data.message);
     } catch (err) {
       setMessage(err.response?.data?.error || 'An error occurred');

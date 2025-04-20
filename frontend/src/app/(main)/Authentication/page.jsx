@@ -8,18 +8,19 @@ import "./style.css";
 import { useRouter } from 'next/navigation';
 import useAppContext from '@/context/AppContext';
 import { GoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
+import Link from 'next/link';
 
 const SignupSchema = Yup.object().shape({
   name: Yup.string().required('Name is required')
-    .min(3, 'Name must be atleast 3 characters'),
+    .min(3, 'Name must be at least 3 characters'),
   email: Yup.string()
     .required('Email is required')
     .email('Email is invalid'),
   password: Yup.string().required('Password is required')
-    .matches(/[A-Z]/, 'Password must contain atleast one uppercase letter')
-    .matches(/[a-z]/, 'Password must contain atleast one lowercase letter')
-    .matches(/[0-9]/, 'Password must contain atleast one number')
-    .matches(/\W/, 'Password must contain atleast one special character')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .matches(/[0-9]/, 'Password must contain at least one number')
+    .matches(/\W/, 'Password must contain at least one special character')
 });
 
 const LoginSchema = Yup.object().shape({
@@ -52,7 +53,7 @@ const App = () => {
 
       axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/add`, values)
         .then((result) => {
-          toast.success('User  created successfully');
+          toast.success('User created successfully');
         }).catch((err) => {
           console.log(err);
           toast.error(err?.response?.data?.message || 'Something went wrong');
@@ -70,7 +71,7 @@ const App = () => {
     onSubmit: (values, { resetForm }) => {
       console.log(values);
 
-      axios.post('http://localhost:5000/user/authenticate', values)
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/authenticate`, values)
         .then((result) => {
           toast.success('Login Success');
           setUserLoggedIn(true);
@@ -100,7 +101,7 @@ const App = () => {
   useEffect(() => {
     const signUpButton = document.getElementById('signUp');
     const signInButton = document.getElementById('signIn');
-    const container = document.getElementById('container')
+    const container = document.getElementById('container');
 
     signUpButton.addEventListener('click', () => {
       setIsActive(true);
@@ -120,6 +121,10 @@ const App = () => {
       });
     }
   }, []);
+
+  const handleForgotPassword = () => {
+    router.push('/resetpassword');
+  };
 
   return (
     <div className='mybody'>
@@ -208,7 +213,7 @@ const App = () => {
                 <div className='text-red-500 text-sm'>{loginForm.errors.password}</div>
               ) : null}
             </div>
-            <a href="#">Forgot your password?</a>
+            <Link href="/resetpassword" className="forgot-password-link">Forgot your password?</Link>
             <button className='hola' type='submit'>Sign In</button>
           </form>
         </div>

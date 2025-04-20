@@ -7,7 +7,7 @@ const Listcomp = () => {
     const [Listcomp, setListcomp] = useState([]);
 
     const fetchcompData = async () => {
-        const res = await axios.get('http://localhost:5000/comp/getall/');
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/comp/getall/`);
         const data = res.data;
         console.log(data);
         setListcomp(data);

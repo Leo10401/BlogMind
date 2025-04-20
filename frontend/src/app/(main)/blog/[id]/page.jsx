@@ -1,9 +1,10 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Avatar, Chip, Breadcrumbs, BreadcrumbItem, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import HTMLReactParser from 'html-react-parser';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
@@ -20,7 +21,8 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState('');
   const [summary2, setSummary2] = useState('');
-  const [showSummary, setShowSummary] = useState(false); // State for toggling summary
+  const [showSummary, setShowSummary] = useState(false);
+  const [showSummary2, setShowSummary2] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState([]);
   const [userData, setUserData] = useState(null);
@@ -28,22 +30,27 @@ const Blog = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
-    fetchBlogData();
-  }, [id]);
-
-  useEffect(() => {
     // Fetch current user's data
     if (email) {
-      axios.get(`http://localhost:5000/user/getbyemail/${email}`)
+      axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyemail/${email}`)
         .then(res => setUserData(res.data))
         .catch(err => console.error("Error fetching user data:", err));
     }
   }, [email]);
 
-  const fetchBlogData = async () => {
+  const fetchBlogsByCategory = useCallback(async (category) => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbycategory/${category}`);
+      setCatBlogs(res.data);
+    } catch (err) {
+      setError('Failed to fetch related blogs.');
+    }
+  }, []);
+
+  const fetchBlogData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/blog/getbyid/${id}`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`, {
         headers: { 'x-auth-token': token },
       });
       setBlogData(res.data);
@@ -54,35 +61,26 @@ const Blog = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, fetchBlogsByCategory]);
 
-  const fetchBlogsByCategory = async (category) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/blog/getbycategory/${category}`);
-      setCatBlogs(res.data);
-    } catch (err) {
-      setError('Failed to fetch related blogs.');
-    }
-  };
-
-  const fetchSummary = async () => {
+  const fetchSummary = useCallback(async () => {
     if (!blogData?.content) return;
 
     try {
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "AIzaSyBfnLaGKASmYcczhMHkLo8hIeh-nrCbclM");
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent("summarize this blog and tell whether the blog is ai genterated in percentage  and tell the word meaning of difficult words: " + blogData.content);
+      const result = await model.generateContent("summarize this blog and tell whether the blog is ai genterated in percentage and tell the word meaning of difficult words: " + blogData.content);
       setSummary(result.response.text());
     } catch (error) {
       console.error("Error generating summary:", error);
     }
-  };
+  }, [blogData]);
 
   const summarizeContent = async () => {
     try {
       const cleanContent = DOMPurify.sanitize(blogData.content);
       const strippedContent = cleanContent.replace(/<\/?[^>]+(>|$)/g, ""); // Remove HTML tags
-      const response = await axios.post("http://localhost:5000/blog/summarize", {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/blog/summarize`, {
         content: strippedContent,
       });
       setSummary2(response.data.summary);
@@ -104,7 +102,7 @@ const Blog = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/blog/comment/${blogData._id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/comment/${blogData._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,8 +129,12 @@ const Blog = () => {
   };
 
   useEffect(() => {
+    fetchBlogData();
+  }, [fetchBlogData]);
+
+  useEffect(() => {
     if (blogData) fetchSummary();
-  }, [blogData]);
+  }, [blogData, fetchSummary]);
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -181,11 +183,15 @@ const Blog = () => {
               {catBlogs.map((blog) => (
                 <div key={blog._id} className="w-96 h-40 flex flex-col justify-center gap-2 bg-neutral-50 rounded-lg shadow p-2">
                   <div className="flex gap-2">
-                    <img
-                      className="bg-neutral-500 w-24 h-24 shrink-0 rounded-lg"
-                      src={blog.image || '/placeholder-image.png'}
-                      alt={blog.title || 'Blog image'}
-                    />
+                    <div className="relative bg-neutral-500 w-24 h-24 shrink-0 rounded-lg">
+                      <Image
+                        src={blog.image || '/placeholder-image.png'}
+                        alt={blog.title || 'Blog image'}
+                        fill
+                        sizes="96px"
+                        className="rounded-lg object-cover"
+                      />
+                    </div>
                     <div className="flex flex-col">
                       <span className="font-bold text-neutral-700 italic">{blog.title || 'Untitled'}</span>
                       <p className="line-clamp-3">{blog.description || 'No description available.'}</p>
@@ -247,7 +253,7 @@ const Blog = () => {
                 <span className="relative z-10 block px-6 py-3 rounded-2xl bg-neutral-950">
                   <div className="relative z-10 flex items-center space-x-3">
                     <span className="transition-all duration-500 group-hover:translate-x-1.5 group-hover:text-emerald-300">
-                      {showSummary ? "Hide Summary" : "Summary by Node summarizer"}
+                      {showSummary2 ? "Hide Summary" : "Summary by Node summarizer"}
                     </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -275,12 +281,14 @@ const Blog = () => {
             </Chip>
 
             <div className="flex items-center gap-4">
-              <Avatar
-                isBordered
-                src={blogData.author?.avatar || '/placeholder-avatar.png'}
-                alt={blogData.author?.name || 'Author avatar'}
-                onClick={onOpen}
-              />
+              <div className="relative">
+                <Avatar
+                  isBordered
+                  src={blogData.author?.avatar || '/placeholder-avatar.png'}
+                  alt={blogData.author?.name || 'Author avatar'}
+                  onClick={onOpen}
+                />
+              </div>
               <span className="font-bold">
                 {blogData.author?.name || 'Unknown Author'}
               </span>
@@ -319,8 +327,14 @@ const Blog = () => {
                       <div>
                         {/* Profile */}
                         <div className="flex items-center gap-x-3">
-                          <div className="shrink-0">
-                            <img className="shrink-0 size-16 rounded-full" src={blogData.author.avatar} alt="Avatar" />
+                          <div className="shrink-0 relative size-16">
+                            <Image 
+                              src={blogData.author?.avatar || '/placeholder-avatar.png'} 
+                              alt="Avatar" 
+                              fill 
+                              sizes="64px"
+                              className="rounded-full object-cover" 
+                            />
                           </div>
                           <div className="grow">
                             <h1 className="text-lg font-medium text-black ">
@@ -385,7 +399,15 @@ const Blog = () => {
               {comments.map((comment, index) => (
                 <div key={index} className="mb-2 p-2 border border-gray-200 rounded">
                   <div className="flex items-center mb-1">
-                    <img src={comment.avatar} alt="Avatar" className="w-8 h-8 rounded-full mr-2" />
+                    <div className="relative w-8 h-8 mr-2">
+                      <Image 
+                        src={comment.avatar || '/placeholder-avatar.png'} 
+                        alt="Avatar" 
+                        fill 
+                        sizes="32px"
+                        className="rounded-full object-cover" 
+                      />
+                    </div>
                     <span className="font-bold">{comment.user}</span>
                   </div>
                   <p>{comment.text}</p>

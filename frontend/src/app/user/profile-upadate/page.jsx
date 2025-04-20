@@ -2,7 +2,8 @@
 import useAppContext from '@/context/AppContext';
 import axios from 'axios';
 import { Formik, Field, Form } from 'formik';
-import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import React, { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 const UpdateProfile = () => {
@@ -10,15 +11,15 @@ const UpdateProfile = () => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [userData, setUserData] = useState(null);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/user/getbyemail/${email}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyemail/${email}`);
       setUserData(res.data);
     } catch (error) {
       console.error('Error fetching user data:', error);
       toast.error('Failed to fetch user data.');
     }
-  };
+  }, [email]);
 
   const uploadAvatar = async (e, setFieldValue) => {
     const file = e.target.files[0];
@@ -44,7 +45,7 @@ const UpdateProfile = () => {
 
   const updateUser = async (values) => {
     try {
-      await axios.put(`http://localhost:5000/user/update/${userData._id}`, values);
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/user/update/${userData._id}`, values);
       toast.success('Your data was updated successfully.');
     } catch (error) {
       console.error('Error updating user data:', error);
@@ -54,7 +55,7 @@ const UpdateProfile = () => {
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [fetchUserData]);
 
   return userData ? (
     <Formik
@@ -71,11 +72,23 @@ const UpdateProfile = () => {
               <label className="block text-sm font-medium">Avatar</label>
               <label className="block cursor-pointer">
                 {previewUrl ? (
-                  <img src={previewUrl} alt="Avatar" className="max-w-full h-40 object-cover rounded-lg" />
+                  <div className="h-40 w-40 relative">
+                    <Image 
+                      src={previewUrl} 
+                      alt="Avatar preview" 
+                      fill
+                      className="object-cover rounded-lg" 
+                    />
+                  </div>
                 ) : (
-                  <img src={userData.avatar} className="h-40 flex items-center justify-center border-2 border-dashed rounded-lg">
-                    
-                  </img>
+                  <div className="h-40 w-40 relative">
+                    <Image 
+                      src={userData.avatar} 
+                      alt="Current avatar" 
+                      fill
+                      className="object-cover rounded-lg" 
+                    />
+                  </div>
                 )}
                 <input
                   type="file"
@@ -94,8 +107,6 @@ const UpdateProfile = () => {
                 className="py-3 px-4 block w-full border rounded-lg text-sm"
               />
             </div>
-
-            
 
             {/* Description */}
             <div className="mt-4">

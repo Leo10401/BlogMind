@@ -1,223 +1,333 @@
-'use client';
-import { IconX } from '@tabler/icons-react';
-import '@wordpress/components/build-style/style.css';
-import '@wordpress/block-editor/build-style/style.css';
-import axios from 'axios';
-import { useFormik } from 'formik'
-import { Editable, useEditor } from "@wysimark/react"
-import React, { useState } from 'react'
-import toast from 'react-hot-toast';
-import JoditEditor, { Jodit } from 'jodit-react';
+"use client"
 
-const Addblog = () => {
-  const code = `# title\n\nHello World!\n\n`;
-  const [previewUrl, setPreviewUrl] = useState(['']);
+import React, { useState, useEffect } from "react"
+import { useFormik } from "formik"
+import axios from "axios"
+import { toast } from "react-hot-toast"
+import Image from "next/image"
+import { X, Upload, TagIcon } from "lucide-react"
+import dynamic from 'next/dynamic'
 
-  const token = localStorage.getItem('token');
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 
-  const [blogContent, setBlogContent] = useState(code);
-  const [tags, setTags] = useState([]);
+// Dynamically import JoditEditor with SSR disabled
+const JoditEditor = dynamic(() => import("jodit-react"), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>
+})
+
+const AddBlog = () => {
+  const initialContent = `# title\n\nHello World!\n\n`
+  const [blogContent, setBlogContent] = useState(initialContent)
+  const [previewUrl, setPreviewUrl] = useState("")
+  const [tags, setTags] = useState([])
+  const [tagInput, setTagInput] = useState("")
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Handle client-side only mounting
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const getToken = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token") || ""
+    }
+    return ""
+  }
+
   const blogForm = useFormik({
     initialValues: {
-      title: '',
-      content: '',
-      image: '',
-      tags: '',
-      description: ''
+      title: "",
+      content: "",
+      image: "",
+      category: "",
+      description: "",
     },
     onSubmit: (values, { resetForm }) => {
-      values.tags = tags;
-      values.content = blogContent;
-      console.log(values);
-
-      axios.post('http://localhost:5000/blog/add', values, {
-        headers: {
-          'x-auth-token' : token
-        }
-      })
-        .then((result) => {
-          toast.success('blog posted successfully');
-        }).catch((err) => {
-          console.log(err);
-          toast.error(err?.response?.data?.message || 'Something went wrong');
-        });
-      resetForm();
-    }
-  });
-
-
-
-  const uploadfile = (e) => {
-    const file = e.target.files[0];
-
-    const formdata = new FormData();
-    formdata.append('file', file);
-    formdata.append('upload_preset', 'myuploadpreset');
-    formdata.append('cloud_name', 'de4osq89e');
-
-    axios.post('https://api.cloudinary.com/v1_1/de4osq89e/image/upload', formdata, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+      const formData = {
+        ...values,
+        tags,
+        content: blogContent,
       }
-    })
+
+      console.log(formData)
+
+      axios
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/blog/add`, formData, {
+          headers: {
+            "x-auth-token": getToken(),
+          },
+        })
+        .then(() => {
+          toast.success("Blog posted successfully")
+          resetForm()
+          setTags([])
+          setBlogContent(initialContent)
+          setPreviewUrl("")
+        })
+        .catch((err) => {
+          console.error(err)
+          toast.error(err?.response?.data?.message || "Something went wrong")
+        })
+    },
+  })
+
+  const uploadFile = (e) => {
+    if (!e.target.files || e.target.files.length === 0) return
+
+    const file = e.target.files[0]
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("upload_preset", "myuploadpreset")
+    formData.append("cloud_name", "de4osq89e")
+
+    toast.loading("Uploading image...")
+
+    axios
+      .post("https://api.cloudinary.com/v1_1/de4osq89e/image/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       .then((result) => {
-        toast.success('File Uploaded Successfully');
-        console.log(result.data);
-        setPreviewUrl(result.data.url);
-        blogForm.setFieldValue('image', result.data.url)
-
-      }).catch((err) => {
-
-        console.log(err);
-        toast.error('File Upload Failed');
-      });
+        toast.dismiss()
+        toast.success("Image uploaded successfully")
+        setPreviewUrl(result.data.url)
+        blogForm.setFieldValue("image", result.data.url)
+      })
+      .catch((err) => {
+        toast.dismiss()
+        console.error(err)
+        toast.error("Image upload failed")
+      })
   }
 
-  const addTag = (e) => {
-    
-    if (e.code === 'Enter') {
-      e.preventDefault();
-      const value = e.target.value;
-      setTags([...tags, value])
-      e.target.value = '';
+  const handleTagInputChange = (e) => {
+    setTagInput(e.target.value)
+  }
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === "Enter" && tagInput.trim()) {
+      e.preventDefault()
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()])
+      }
+      setTagInput("")
     }
   }
 
-  const removeTag = (index) => {
-    setTags( tags.filter((_, i) => i!==index) );
+  const removeTag = (indexToRemove) => {
+    setTags(tags.filter((_, index) => index !== indexToRemove))
   }
 
+  const handleCategoryChange = (value) => {
+    blogForm.setFieldValue("category", value)
+  }
+
+  const triggerFileInput = () => {
+    if (isMounted) {
+      document.getElementById("upload-image").click()
+    }
+  }
 
   return (
-    <div className='bg-emerald-200'>
-      {/* Card Section */}
-      <div className="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-6 mx-auto">
-        <form onSubmit={blogForm.handleSubmit}>
-          {/* Card */}
-          <div className="bg-white rounded-xl shadow dark:bg-neutral-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-10">
+      <div className="container max-w-4xl mx-auto px-4">
+        <Card className="shadow-lg border-0">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Create New Blog Post</CardTitle>
+            <CardDescription>Share your knowledge with the world</CardDescription>
+          </CardHeader>
 
-            <div className=" p-4 sm:p-7 pt-5">
+          <CardContent>
+            <form onSubmit={blogForm.handleSubmit} className="space-y-6">
+              {/* Title */}
+              <div className="space-y-2">
+                <label htmlFor="title" className="text-sm font-medium">
+                  Blog Title
+                </label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Enter an engaging title"
+                  onChange={blogForm.handleChange}
+                  value={blogForm.values.title}
+                  required
+                />
+              </div>
 
-              <h1 className='my-4 font-bold text-white text-2xl'>Create New Blog</h1>
-              {/* Grid */}
-              <div className="space-y-4 sm:space-y-6">
+              {/* Cover Image */}
+              <div className="space-y-2">
+                <label htmlFor="cover-image-container" className="text-sm font-medium">
+                  Cover Image
+                </label>
+                <div 
+                  id="cover-image-container"
+                  className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  onClick={triggerFileInput}
+                >
+                  {previewUrl ? (
+                    <div className="relative h-48 w-full mb-4">
+                      <Image
+                        src={previewUrl || "/placeholder.svg"}
+                        alt="Cover preview"
+                        className="object-cover rounded-lg"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent triggering file input
+                          setPreviewUrl("");
+                          blogForm.setFieldValue("image", "");
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="py-6">
+                      <Upload className="h-10 w-10 mx-auto text-slate-400" />
+                      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                        Drag and drop an image or <span className="text-primary font-medium">browse</span>
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">Recommended: 1200×630px (16:9 ratio) • Max 2MB</p>
+                    </div>
+                  )}
+                  <input id="upload-image" type="file" accept="image/*" className="hidden" onChange={uploadFile} />
+                </div>
+              </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="af-submit-app-project-name" className="inline-block text-sm font-medium text-gray-800 mt-2.5 dark:text-neutral-200">
-                    Blog Title
-                  </label >
-                  <input id="title" onChange={blogForm.handleChange} value={blogForm.values.title} type="text" className="border py-2 px-3 pe-11 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Enter project name"
+              {/* Tags */}
+              <div className="space-y-2">
+                <label htmlFor="tags" className="text-sm font-medium">
+                  Tags
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1 py-1 px-3">
+                      <TagIcon className="h-3 w-3" />
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(index)}
+                        className="ml-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex">
+                  <Input
+                    id="tags"
+                    placeholder="Add tags and press Enter"
+                    value={tagInput}
+                    onChange={handleTagInputChange}
+                    onKeyDown={handleTagKeyDown}
                   />
                 </div>
-                
-
-
-                <div className="space-y-2">
-                  <label htmlFor="af-submit-app-upload-images" className="inline-block text-sm font-medium text-gray-800 mt-2.5 dark:text-neutral-200">
-                    Cover image
-                  </label>
-                  <label htmlFor="upload-image" className="group p-4 sm:p-7 block cursor-pointer text-center border-2 border-dashed border-gray-200 rounded-lg focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 dark:border-neutral-700">
-                    {previewUrl ? (
-                      <img src={previewUrl} alt="" className="max-w-full h-40 object-cover rounded-lg" />
-                    ) : (
-                      <svg className="size-10 mx-auto text-gray-400 dark:text-neutral-600" xmlns="http://www.w3.org/2000/svg" width={16} height={16} fill="currentColor" viewBox="0 0 16 16">
-                        <path fillRule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2z" />
-                        <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z" />
-                      </svg>
-                    )}
-                    <input id='upload-image' onChange={uploadfile} name="af-submit-app-upload-images" type="file" className="hidden" />
-                    <span className="mt-2 block text-sm text-gray-800 dark:text-neutral-200">
-                      Browse your device or <span className="group-hover:text-blue-700 text-blue-600">drag 'n drop'</span>
-                    </span>
-                    <span className="mt-1 block text-xs text-gray-500 dark:text-neutral-500">
-                      Maximum file size is 2 MB
-                    </span>
-                  </label>
-                </div>
-                <label htmlFor="" className='text-white  flex' > Tags</label>
-                <input type="text" id='tags' name='tags' onKeyDown={addTag} className='rounded-2xl'/>
-
-                <div className='flex gap-2 rounded-3xl '>
-                  {
-                    tags.map((tag, index) => (
-                      <div className='flex text-white border px-2 py-1 rounded-lg bg 
-                      '>
-                        <p>{tag}</p>
-                        <IconX  className='bg-red-500 ml-1' onClick={() => {removeTag(index)}} />
-                      </div>
-                    ))
-                  }
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="af-submit-app-category" className="inline-block text-sm font-medium text-gray-800 mt-2.5 dark:text-neutral-200">
-                    Category
-                  </label>
-                  <select id="category" onChange={blogForm.handleChange} value={blogForm.values.category} className="py-2 px-3 pe-9 block w-full border-gray-200 shadow-sm rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
-                    <option selected>Select a category</option>
-                    <option>Technology</option>
-                    <option>Education</option>
-                    <option>Entertainment</option>
-                    <option>Food & Drink</option>
-                    <option>Design & Creativity</option>
-                    <option>Environment & Sustainability</option>
-                    <option>Parenting & Family</option>
-                    <option>Sports & Fitness</option>
-                    <option>Lifestyle</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="af-submit-app-description" className="inline-block text-sm font-medium text-gray-800 mt-2.5 dark:text-neutral-200">
-                    Description
-                  </label>
-                  <textarea id="description" onChange={blogForm.handleChange} value={blogForm.values.description} className="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows={6} placeholder="A detailed summary will better explain your products to the audiences. Our users will see this in your dedicated product page." defaultValue={""} />
-                </div>
-
-                <JoditEditor
-  value={blogContent}
-  config={{
-    uploader: {
-      insertImageAsBase64URI: true, // Allows image insertion as Base64
-      url: 'https://api.cloudinary.com/v1_1/de4osq89e/image/upload', // Cloudinary upload URL
-      isSuccess: (response) => {
-        const uploadedUrl = response.data.url; // Extract uploaded image URL
-        setBlogContent((prevContent) => `${prevContent}<img src="${uploadedUrl}" alt="uploaded image"/>`);
-        toast.success('Image uploaded successfully');
-      },
-      error: (err) => {
-        console.error('Upload Error:', err);
-        toast.error('Image upload failed');
-      },
-    },
-    height: 400, // Set the editor height
-    spellcheck: true, // Enable spellcheck
-    toolbar: true, // Show toolbar
-    readonly: false, // Enable editing
-// Custom buttons in the toolbar
-    placeholder: 'Start writing your blog content here...',
-  }}
-  onBlur={(newContent) => setBlogContent(newContent)} // Save the edited content on blur
-/>
-
-
-                  
-
               </div>
-              {/* End Grid */}
-              <div className="mt-5 flex justify-center gap-x-2">
-                <button type="submit" className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                  Submit your project
-                </button>
+
+              {/* Category */}
+              <div className="space-y-2">
+                <label htmlFor="category" className="text-sm font-medium">
+                  Category
+                </label>
+                <Select onValueChange={handleCategoryChange} value={blogForm.values.category}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Technology">Technology</SelectItem>
+                    <SelectItem value="Education">Education</SelectItem>
+                    <SelectItem value="Entertainment">Entertainment</SelectItem>
+                    <SelectItem value="Food & Drink">Food & Drink</SelectItem>
+                    <SelectItem value="Design & Creativity">Design & Creativity</SelectItem>
+                    <SelectItem value="Environment & Sustainability">Environment & Sustainability</SelectItem>
+                    <SelectItem value="Parenting & Family">Parenting & Family</SelectItem>
+                    <SelectItem value="Sports & Fitness">Sports & Fitness</SelectItem>
+                    <SelectItem value="Lifestyle">Lifestyle</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          </div>
-          {/* End Card */}
-        </form>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <label htmlFor="description" className="text-sm font-medium">
+                  Description
+                </label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="A brief summary of your blog post"
+                  rows={3}
+                  onChange={blogForm.handleChange}
+                  value={blogForm.values.description}
+                />
+              </div>
+
+              {/* Content Editor */}
+              <div className="space-y-2">
+                <label htmlFor="content" className="text-sm font-medium">
+                  Content
+                </label>
+                <div className="border rounded-md overflow-hidden">
+                  {isMounted && (
+                    <JoditEditor
+                      value={blogContent}
+                      config={{
+                        uploader: {
+                          insertImageAsBase64URI: true,
+                          url: "https://api.cloudinary.com/v1_1/de4osq89e/image/upload",
+                          isSuccess: (response) => {
+                            const uploadedUrl = response.data.url
+                            setBlogContent(
+                              (prevContent) => `${prevContent}<img src="${uploadedUrl}" alt="uploaded image"/>`,
+                            )
+                            toast.success("Image uploaded successfully")
+                          },
+                          error: (err) => {
+                            console.error("Upload Error:", err)
+                            toast.error("Image upload failed")
+                          },
+                        },
+                        height: 500,
+                        spellcheck: true,
+                        toolbar: true,
+                        readonly: false,
+                        placeholder: "Start writing your blog content here...",
+                        theme: "default",
+                      }}
+                      onBlur={(newContent) => setBlogContent(newContent)}
+                    />
+                  )}
+                  {!isMounted && <div className="p-4 text-center">Loading editor...</div>}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end pt-4">
+                <Button type="submit" size="lg" className="px-8">
+                  Publish Blog Post
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-      {/* End Card Section */}
-
     </div>
   )
 }
 
-export default Addblog
+export default AddBlog

@@ -6,8 +6,6 @@ import toast from 'react-hot-toast';
 import { InputOtp } from "@heroui/input-otp";
 import { useRouter } from 'next/navigation';
 
-
-
 const ResetPassword = () => {
     const [userData, setUserData] = useState(null);
     const [otpValue, setOtpValue] = React.useState("");
@@ -15,63 +13,71 @@ const ResetPassword = () => {
 
     const emailRef = useRef(null);
     const [loading, setLoading] = useState(false);
-    const [Error, setError] = useState(false);
+    const [error, setError] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
 
-    const sendmail = async () => {
+    const sendMail = async () => {
         if (!emailRef.current.value) {
-
-            alert("Please enter your email");
+            toast.error("Please enter your email");
             return;
-        } else {
-            try {
-                const res = await axios.get(`http://localhost:5000/user/getbyemail/` + emailRef.current.value);
-
-                const data = res.data;
-                setUserData(data);
-                console.log("user found");
-                toast.success('Otp sent')
-
-                // send otp
-                const otpRes = await axios.post('http://localhost:5000/util/send-otp', {
-                    recipient: emailRef.current.value
-                });
-
-                
-
-
-            } catch (err) {
-                setError("Failed to fetch email");
-                if (err.response.status === 404) {
-                    toast.error('Email Not found');
-                } else {
-                    toast.error('Something went wrong');
-                    console.log(err);
-                }
-
-
-            } finally {
-                setLoading(false);
+        }
+        
+        setLoading(true);
+        setError(false);
+        
+        try {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyemail/` + emailRef.current.value);
+            const data = res.data;
+            setUserData(data);
+            
+            // Send OTP
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/util/send-otp`, {
+                recipient: emailRef.current.value
+            });
+            
+            toast.success('OTP sent to your email');
+            setOtpSent(true);
+        } catch (err) {
+            if (err.response?.status === 404) {
+                toast.error('Email not found');
+            } else {
+                toast.error('Something went wrong');
+                console.log(err);
             }
-        };
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const verifyOTP = async () => {
-        //verify otp
+        if (otpValue.length !== 6) {
+            toast.error('Please enter the complete 6-digit OTP');
+            return;
+        }
+        
+        setLoading(true);
+        
         try {
-            const verifyRes = await axios.post('http://localhost:5000/util/verify-otp', {
-                email : emailRef.current.value,
+            const verifyRes = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/util/verify-otp`, {
+                email: emailRef.current.value,
                 otp: otpValue
             });
-            toast.success('otp Verified');
-            console.log("otp verified");
-            router.push('/authentication');
-
-
+            
+            toast.success('OTP verified successfully');
+            
+            // Navigate to password update page with user ID
+            if (userData && userData._id) {
+                router.push('/updatepassword/' + userData._id);
+            } else {
+                toast.error('User data not found');
+            }
         } catch (error) {
             console.log(error);
-            toast.error('something went wrong');
+            toast.error('Invalid OTP or verification failed');
+        } finally {
+            setLoading(false);
         }
-
     }
 
     const MailIcon = (props) => {
@@ -93,46 +99,87 @@ const ResetPassword = () => {
             </svg>
         );
     };
-    return (
-        <div className='h-96 flex flex-col w-auto justify-center items-center'>
-            <div className='flex '><Input
-                ref={emailRef}
-                isClearable
-                isRequired
-                className="max-w-xs"
-                defaultValue="@gmail.com"
-                label="Email"
-                type="email"
-                startContent={
-                    <MailIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                }
-            />
 
-                <button onClick={sendmail} className="text-xl w-32 h-12 rounded bg-emerald-500 text-white relative overflow-hidden group z-10 hover:text-white duration-1000">
-                    <span className="absolute bg-emerald-600 w-36 h-36 rounded-full group-hover:scale-100 scale-0 -z-10 -left-2 -top-10 group-hover:duration-500 duration-700 origin-center transform transition-all" />
-                    <span className="absolute bg-emerald-800 w-36 h-36 -left-2 -top-10 rounded-full group-hover:scale-100 scale-0 -z-10 group-hover:duration-700 duration-500 origin-center transform transition-all" />
-                    Send OTP
-                </button>
-            </div>
-            <div className="flex flex-col items-start gap-2">
-                <InputOtp length={6}  value={otpValue} color='secondary' onValueChange={setOtpValue} />
-                <div className="text-small  text-default-500">
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8">
+                <div>
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Reset Your Password</h2>
+                    <p className="mt-2 text-center text-sm text-gray-600">
+                        Enter your email to receive an OTP for password reset
+                    </p>
+                </div>
+                
+                <div className="mt-8 space-y-6">
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4 items-center">
+                            <Input
+                                ref={emailRef}
+                                isClearable
+                                isRequired
+                                className="max-w-xs"
+                                placeholder="your.email@example.com"
+                                label="Email"
+                                type="email"
+                                startContent={
+                                    <MailIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+                                }
+                                isDisabled={loading || otpSent}
+                            />
+                            <button 
+                                onClick={sendMail} 
+                                disabled={loading}
+                                className={`text-white px-4 py-2 rounded transition-all ${loading ? 
+                                  'bg-gray-400 cursor-not-allowed' : 
+                                  'bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700'}`}
+                            >
+                                {loading ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
+                            </button>
+                        </div>
+                        
+                        {otpSent && (
+                            <div className="mt-6 flex flex-col items-center gap-4">
+                                <p className="text-sm text-gray-600 mb-2">Enter the 6-digit OTP sent to your email</p>
+                                                <InputOtp length={6} value={otpValue} color='secondary' onValueChange={setOtpValue} />
+                <div className="text-small text-default-500">
                     OTP value: <span className="text-md font-medium">{otpValue}</span>
                 </div>
-                <button onClick={verifyOTP} className="cursor-pointer transition-all 
-            bg-gray-700 text-white px-6 py-2 rounded-lg
-            border-green-400
-            border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px]
-            active:border-b-[2px] active:brightness-90 active:translate-y-[2px] hover:shadow-xl hover:shadow-green-300 shadow-green-300 active:shadow-none">
-                    Verify
-                </button>
-
+                                
+                                <button 
+                                    onClick={verifyOTP} 
+                                    disabled={loading || otpValue.length !== 6}
+                                    className={`mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                                        loading || otpValue.length !== 6 
+                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                        : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                                    }`}
+                                >
+                                    {loading ? 'Verifying...' : 'Verify OTP & Reset Password'}
+                                </button>
+                                
+                                <div className="text-xs text-gray-500 mt-2">
+                                    Didn&apos;t receive the OTP? <button 
+                                        onClick={sendMail}
+                                        className="text-blue-600 hover:text-blue-800"
+                                        disabled={loading}
+                                    >
+                                        Resend
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="flex justify-center mt-4">
+                            <button
+                                onClick={() => router.push('/')} 
+                                className="text-sm text-gray-600 hover:text-gray-900"
+                            >
+                                Back to Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-
-
-
-
         </div>
     )
 }

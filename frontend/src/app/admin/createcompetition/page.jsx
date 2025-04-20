@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import axios from 'axios';
 import { FiHome, FiBarChart2, FiLogOut } from "react-icons/fi";
+import Image from 'next/image';
 
 const Competition = () => {
   const [deadline, setDeadline] = useState('');
@@ -21,7 +22,7 @@ const Competition = () => {
       // values.lastdate = deadline;
       console.log(values);
 
-      axios.post('http://localhost:5000/comp/add', values)
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/comp/add`, values)
         .then((result) => {
           toast.success('Blog posted successfully');
         }).catch((err) => {
@@ -39,7 +40,7 @@ const Competition = () => {
     formdata.append('upload_preset', 'myuploadpreset');
     formdata.append('cloud_name', 'de4osq89e');
 
-    axios.post('https://api.cloudinary.com/v1_1/de4osq89e/image/upload', formdata, {
+    axios.post(`https://api.cloudinary.com/v1_1/de4osq89e/image/upload`, formdata, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -72,7 +73,7 @@ const Competition = () => {
                     </label>
                     <label htmlFor="upload-image" className="group p-4 sm:p-7 block cursor-pointer text-center border-2 border-dashed border-gray-200 rounded-lg focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 dark:border-neutral-700">
                       {previewUrl ? (
-                        <img src={previewUrl} alt="" className="max-w-full h-40 object-cover rounded-lg" />
+                        <Image width={500} height={400} src={previewUrl} alt="" className="max-w-full h-40 object-cover rounded-lg" />
                       ) : (
                         <svg className="size-90  mx-auto text-gray-400 dark:text-neutral-600" xmlns="http://www.w3.org/2000/svg" width={160} height={160} fill="currentColor" viewBox="0 0 16 16">
                           <path fillRule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2z" />

@@ -10,11 +10,13 @@ import Links from './(main)/links/page';
 import { Navbar } from '@/components/Nav';
 
 
+
 const Home = () => {
   const [isVertical, setIsVertical] = React.useState(false);
   return (
     <>
     <Navbar />
+    
     <div className="flex flex-col px-4">
       <div className="flex w-full flex-col">
         <Tabs aria-label="Options" className='justify-center py-4 ' >

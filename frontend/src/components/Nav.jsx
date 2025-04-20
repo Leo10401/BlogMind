@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import useAppContext from "@/context/AppContext"
 import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react"
+import Image from "next/image"
 
 const navItems = [
   { label: "Features", href: "/Features" },
@@ -23,7 +24,7 @@ export function Navbar() {
     const fetchPersonalData = async () => {
       try {
         if (!email) return; // Prevent unnecessary API call if email is missing
-        const res = await axios.get(`http://localhost:5000/user/getbyemail/${email}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyemail/${email}`);
         setPersonalData(res.data);
       } catch (error) {
         console.error("Error fetching personal data:", error);
@@ -36,8 +37,17 @@ export function Navbar() {
   const showLoginOptions = () => {
     if (userLoggedIn) {
       return (
-        <div>
+        <div class>
+
+
           <div className="hidden md:flex items-center space-x-4 z-30 ">
+<Link href='/user/add-blog' title="Add New" className="group cursor-pointer outline-none hover:rotate-90 duration-300">
+  <svg xmlns="http://www.w3.org/2000/svg" width="50px" height="50px" viewBox="0 0 24 24" className="stroke-lime-400 fill-none group-hover:fill-lime-800 group-active:stroke-lime-200 group-active:fill-lime-600 group-active:duration-0 duration-300">
+    <path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" strokeWidth="1.5" />
+    <path d="M8 12H16" strokeWidth="1.5" />
+    <path d="M12 16V8" strokeWidth="1.5" />
+  </svg>
+</Link>
             <div className="flex items-center space-x-2 text-black">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="w-10">
                 <circle cx={100} cy={100} r={95} fill="maroon" stroke="darkgoldenrod" strokeWidth={5} />
@@ -97,7 +107,9 @@ export function Navbar() {
           <div className="flex items-center">
           <Link className="mr-4 object-contain size-16 " href="/">
           <div className="hidden object-contain sm:block font-bold text-inherit text-start ">
-            <img src="/black.png" alt="" className="bg-none" />
+            <Image src="/black.png" alt="" className="bg-none"   
+             width={50} // Replace 50 with the desired width
+             height={50}/>
           </div>
         </Link>
             <div className="hidden md:block">

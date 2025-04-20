@@ -21,7 +21,7 @@ const Layout = ({ children }) => {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/user/getbyuser`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyuser`, {
         headers: { 'x-auth-token': token },
       });
       setUserData(res.data);

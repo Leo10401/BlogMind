@@ -1,7 +1,7 @@
 'use client';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { Button } from "@nextui-org/react";
 
@@ -19,7 +19,7 @@ const Participant = () => {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:5000/user/give-coins', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/give-coins`, {
         userId,
         coins: parseInt(coins),
       });
@@ -31,34 +31,35 @@ const Participant = () => {
     }
   };
 
-  const fetchParticipantData = async () => {
+  // Using useCallback to memoize these functions
+  const fetchParticipantData = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/part/getbycompetition/${id}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/part/getbycompetition/${id}`);
       setParticipants(res.data);
     } catch (error) {
       console.error('Error fetching participant data:', error);
       toast.error('Failed to fetch participant data');
     }
-  };
+  }, [id]);
 
-  const fetchCompetition = async () => {
+  const fetchCompetition = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/comp/getbyid/${id}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/comp/getbyid/${id}`);
       setCompData(res.data);
     } catch (error) {
       console.error('Error fetching competition data:', error);
       toast.error('Failed to fetch competition data');
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchParticipantData();
     fetchCompetition();
-  }, []);
+  }, [fetchParticipantData, fetchCompetition]); // Added the memoized functions as dependencies
 
   const declareWinner = async (participantId) => {
     try {
-      const result = await axios.put(`http://localhost:5000/comp/update/${id}`, {
+      const result = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/comp/update/${id}`, {
         winner: participantId,
       });
       setCompData(result.data);
@@ -70,7 +71,7 @@ const Participant = () => {
 
   const deleteParticipant = async (participantId) => {
     try {
-      await axios.delete(`http://localhost:5000/part/delete/${participantId}`);
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/part/delete/${participantId}`);
       fetchParticipantData(); // Refresh data after deletion
       toast.success('Participant deleted successfully');
     } catch (err) {

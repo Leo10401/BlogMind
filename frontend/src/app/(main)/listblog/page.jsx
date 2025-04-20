@@ -6,6 +6,7 @@ import './style.css'
 import Link from 'next/link';
 import {RadioGroup, Radio} from "@heroui/react";
 import AnimatedContent from '../../../components/Animated-content';
+import Image from 'next/image';
 
 
 const BlogList = () => {
@@ -15,7 +16,7 @@ const BlogList = () => {
   const [sortOption, setSortOption] = useState(''); // State for sorting option
 
   const fetchBlogData = async () => {
-    const res = await axios.get('http://localhost:5000/blog/getall/');
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall/`);
     const data = res.data;
     console.log(data);
     setBlogList(data);
@@ -236,7 +237,13 @@ const BlogList = () => {
                     scale={1.1}
                     threshold={0.2}>
                     <div className="max-w-lg bg-white rounded-xl shadow-xl min-h-full overflow-hidden">
-                      <img src={blog.image} alt="Yoga Pose" className="w-full h-72 object-cover hover:scale-105 duration-700" />
+                      <Image 
+                        src={blog.image} 
+                        alt="Yoga Pose" 
+                        width={500} // Replace with the appropriate width
+                        height={300} // Replace with the appropriate height
+                        className="w-full h-72 object-cover hover:scale-105 duration-700" 
+                      />
                       <div className="p-5">
                         <div className="text-lg font-semibold flex flex-row justify-between">
                           <div className=''>
