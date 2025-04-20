@@ -96,7 +96,7 @@ export function Navbar() {
         </div>
       );
     } else {
-      return <Link href="/authentication">Login</Link>;
+      return <Link href="/Authentication">Login</Link>;
     }
   };
 

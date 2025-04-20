@@ -61,7 +61,7 @@ const UpdatePassword = () => {
                 
                 // Redirect to login page after successful password update
                 setTimeout(() => {
-                    router.push('/authentication');
+                    router.push('/Authentication');
                 }, 2000);
             } catch (err) {
                 console.error(err);

@@ -22,7 +22,7 @@ export const AppProvider = ({ children }) => {
         localStorage.removeItem("token");
         localStorage.removeItem("email");
         setUserLoggedIn(false);
-        router.push('/authentication');
+        router.push('/Authentication');
     }
 
     return <AppContext.Provider value={{ userLoggedIn, setUserLoggedIn, logout, email, setEmail }}>
