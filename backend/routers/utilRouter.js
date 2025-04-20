@@ -7,16 +7,69 @@ const router = express.Router();
 
 const getOTPTemplate = (otp) => {
     return `<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>You have an OTP</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .email-business { 
+      padding: 30px; 
+      background-color: #f7f7f7; 
+    }
+    .header { 
+      font-size: 24px; 
+      font-weight: bold; 
+      color: #333;
+      
+    }
+    .subheader { 
+      font-size: 18px; 
+      color: #666; 
+      margin-top: 10px;
+      
+    }
+    .content { 
+      margin-top: 20px; 
+      color: #444; 
+      line-height: 1.5;
+      
+    }
+    .cta-button { 
+      display: inline-block; 
+      padding: 12px 24px; 
+      background-color: #89c9e1; 
+      color: white; 
+      text-decoration: none; 
+      border-radius: 4px; 
+      font-weight: 500;
+      margin-top: 25px;
+    }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; font-size: 12px; text-align: center; }
+    
+    
+    
+    
+    
+  </style>
 </head>
 <body>
-    
-    <h1>Your OTP of Resetting Password is : ${otp}</h1>
-
+  <div class="container">
+    <div class="email-business">
+    <div style="text-align: center; margin-bottom: 25px;">
+        <div style="display: inline-block; width: 60px; height: 60px; background-color: #ddd; border-radius: 50%; line-height: 60px; text-align: center; font-size: 24px; font-weight: bold;"></div>
+      </div>
+      <div class="content">
+        You have an OTP<br/><br/>You got an OTP from BlogMind for resetting your password.  This is a crucial step in securing your BlogMind account.<br/><br/>Your OTP is: <strong> ${otp} <strong/>.  Please enter this code within the next 10 minutes to reset your password and regain access to your account.  This ensures the safety and security of your valuable content and data.<br/><br/>Resetting your password is quick and easy.  Learn More to securely update your password and continue enjoying the benefits of BlogMind.<br/>Thanks for using BlogMind<br/>
+      </div>
+      <div style="text-align: center;">
+        <a href="https://blog-mind.vercel.app" class="cta-button" style="display: inline-block; padding: 12px 24px; background-color: #89c9e1; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; margin-top: 25px;">Learn More</a>
+      </div>
+      <div class="footer">Thanks for using BlogMind</div>
+    </div>
+  </div>
 </body>
 </html>`
 }
