@@ -8,8 +8,9 @@ import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import useAppContext from "@/context/AppContext"
-import { Eye, EyeOff, Facebook, Twitter, Linkedin, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react"
+import { Eye, EyeOff, Facebook, Twitter, Linkedin, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react'
 import "./style.css"
+import "./animation.css"
 
 // Validation schemas
 const SignupSchema = Yup.object().shape({
@@ -186,6 +187,22 @@ export default function AuthPage() {
   return (
     <div className="mybody">
       <div className={`container ${isActive ? "right-panel-active" : ""}`} id="container">
+        {/* Mobile Toggle Buttons */}
+        <div className="mobile-toggle">
+          <button
+            className={`mobile-toggle-btn ${!isActive ? "active" : ""}`}
+            onClick={() => setIsActive(false)}
+          >
+            Sign In
+          </button>
+          <button
+            className={`mobile-toggle-btn ${isActive ? "active" : ""}`}
+            onClick={() => setIsActive(true)}
+          >
+            Sign Up
+          </button>
+        </div>
+
         {/* Sign Up Form Container */}
         <div className="form-container sign-up-container">
           <form onSubmit={signupForm.handleSubmit}>
@@ -377,8 +394,7 @@ export default function AuthPage() {
               disabled={isLoading}
             >
               {isLoading ? (
-                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-              ) : formSuccess ? (
+                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>              ) : formSuccess ? (
                 <>
                   {formSuccess}
                   <Sparkles className="h-4 w-4" />
