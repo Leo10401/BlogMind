@@ -72,7 +72,7 @@ export default function Blog() {
 
   const fetchBlogData = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token")
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`, {
         headers: { "x-auth-token": token },
       })
@@ -136,7 +136,7 @@ export default function Blog() {
     }
 
     try {
-      const token = localStorage.getItem("token")
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/comment/${blogData._id}`, {
         method: "POST",
         headers: {

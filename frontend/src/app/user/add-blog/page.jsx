@@ -36,7 +36,7 @@ const AddBlog = () => {
 
   const getToken = () => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("token") || ""
+      return window.localStorage.getItem("token") || ""
     }
     return ""
   }

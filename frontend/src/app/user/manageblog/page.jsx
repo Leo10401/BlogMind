@@ -9,13 +9,14 @@ const Manageblog = () => {
   const [userBlogs, setUserBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Move token inside the component methods to ensure it's retrieved at runtime
   // rather than during server rendering
   
   // Use useCallback to memoize the fetchBlog function so it can be used in useEffect
   const fetchBlog = useCallback(async () => {
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('token') : null;
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyuser`, {
         headers: {
@@ -34,6 +35,9 @@ const Manageblog = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsAuthenticated(Boolean(window.localStorage.getItem('token')));
+    }
     fetchBlog(); // Fetch blogs when component mounts
   }, [fetchBlog]); // Add fetchBlog to the dependency array
 
@@ -41,7 +45,7 @@ const Manageblog = () => {
     e.preventDefault(); // Prevent link navigation when delete is clicked
     e.stopPropagation(); // Stop event propagation
     
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('token') : null;
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/blog/delete/${id}`, {
         headers: {
@@ -67,7 +71,7 @@ const Manageblog = () => {
             </div>
           </div>
           {
-            !localStorage.getItem('token') ? (
+            !isAuthenticated ? (
               <h1>Please Login to participate</h1>
             ) : loading ? (
               <h1>Loading...</h1>

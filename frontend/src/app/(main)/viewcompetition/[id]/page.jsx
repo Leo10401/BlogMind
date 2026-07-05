@@ -17,7 +17,11 @@ const ViewComp = () => {
   const [participants, setParticipants] = useState([]);
   const [selBlog, setSelBlog] = useState('');
   const [userBlogs, setUserBlogs] = useState([]);
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+  const getToken = () => {
+    if (typeof window === 'undefined') return null;
+    return window.localStorage.getItem('token');
+  };
 
   const fetchCompData = useCallback(async () => {
     try {

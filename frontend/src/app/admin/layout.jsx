@@ -19,8 +19,12 @@ const Layout = ({ children }) => {
   const { logout } = useAppContext();
 
   const fetchUserData = async () => {
+    let token = null;
+    if (typeof window !== 'undefined') {
+      token = window.localStorage.getItem('token');
+    }
+
     try {
-      const token = localStorage.getItem('token');
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyuser`, {
         headers: { 'x-auth-token': token },
       });

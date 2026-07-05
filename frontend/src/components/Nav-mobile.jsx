@@ -15,7 +15,9 @@ export function MobileMenu({ items }) {
   useEffect(() => {
     const fetchPersonalData = async () => {
       try {
-        const email = JSON.parse(localStorage.getItem("user"))?.email; // Get email from localStorage
+        if (typeof window === 'undefined') return;
+        const storedUser = window.localStorage.getItem("user");
+        const email = storedUser ? JSON.parse(storedUser)?.email : null;
         if (!email) return; // Prevent unnecessary API call
 
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getbyemail/${email}`);
