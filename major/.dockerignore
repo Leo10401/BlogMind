@@ -1,0 +1,21 @@
+
+# Ignore node_modules
+node_modules
+
+# Ignore .next folder for Next.js
+.next
+
+# Ignore npm debug log
+npm-debug.log
+
+# Ignore Dockerfile
+Dockerfile
+
+# Ignore .dockerignore
+.dockerignore
+
+# Ignore .git
+.git
+
+# Ignore .gitignore
+.gitignore 

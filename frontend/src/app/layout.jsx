@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           
-        {isLoading ? (
+        {/* {isLoading ? (
         <div className="h-screen flex justify-center items-center">
             <svg xmlns="http://www.w3.org/2000/svg" height="200px" width="200px" viewBox="0 0 200 200" className="pencil">
               <defs>
@@ -69,12 +69,13 @@ export default function RootLayout({ children }) {
             </svg>
 
             </div>
-        ) : (
+        ) : ( */}
           <AppProvider>
             <Toaster />
+            
             {children}
           </AppProvider>
-        )}
+        {/* )} */}
       </body>
     </html>
   );

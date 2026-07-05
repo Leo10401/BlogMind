@@ -1,14 +1,32 @@
-"use client"
-import { Tabs, Tab, Card, CardBody } from "@nextui-org/react"
-import Bloglist from "./(main)/listblog/page"
-import Features from "./Features/page"
-import Listcomp from "./(main)/competition/page"
-import Links from "./(main)/links/page"
-import { Navbar } from "@/components/Nav"
+"use client";
+import { Tabs, Tab, Card, CardBody } from "@nextui-org/react";
+import Bloglist from "./(main)/listblog/page";
+import Features from "./Features/page";
+import Listcomp from "./(main)/competition/page";
+import Links from "./(main)/links/page";
+import { Navbar } from "@/components/Nav";
+import Image from "next/image";
 
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Blog Mind",
+            url: "https://blog-mind.vercel.app",
+            potentialAction: {
+              "@type": "SearchAction",
+              target:
+                "https://blog-mind.vercel.app/search?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          }),
+        }}
+      />
       <Navbar />
 
       <div className="flex flex-col px-2 sm:px-4 flex-grow max-w-7xl mx-auto w-full">
@@ -32,6 +50,7 @@ const Home = () => {
                 <CardBody className="p-0 sm:p-4">
                   <Features />
                   <Links />
+
                 </CardBody>
               </Card>
             </Tab>
@@ -39,7 +58,9 @@ const Home = () => {
               key="latest"
               title={
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm sm:text-base font-medium">Latest</span>
+                  <span className="text-sm sm:text-base font-medium">
+                    Latest
+                  </span>
                 </div>
               }
             >
@@ -53,7 +74,9 @@ const Home = () => {
               key="challenges"
               title={
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm sm:text-base font-medium">Challenges</span>
+                  <span className="text-sm sm:text-base font-medium">
+                    Challenges
+                  </span>
                 </div>
               }
             >
@@ -67,7 +90,7 @@ const Home = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

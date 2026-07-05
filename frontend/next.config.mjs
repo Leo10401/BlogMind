@@ -8,6 +8,7 @@ const nextConfig = {
         'i.pravatar.cc',
         'avatar.iran.liara.run',
         'dummyimage.com',
+        'imgs.search.brave.com',
       ],
       // You can add more domains here if needed
     },

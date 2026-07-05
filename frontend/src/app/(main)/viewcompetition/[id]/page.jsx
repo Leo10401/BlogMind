@@ -296,6 +296,27 @@ const ViewComp = () => {
           )}
         </div>
       </section>
+      {compData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Event",
+              "name": compData.title,
+              "description": compData.description || "",
+              "startDate": compData.startDate,
+              "endDate": compData.endDate,
+              "image": compData.image || "",
+              "url": `https://blog-mind.vercel.app/viewcompetition/${compData._id}`,
+              "eventStatus": "https://schema.org/EventScheduled"
+            })
+          }}
+        />
+      )}
+
+
+
     </div>
   );
 };

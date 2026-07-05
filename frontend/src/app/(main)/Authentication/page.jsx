@@ -71,7 +71,7 @@ export default function AuthPage() {
     },
     validationSchema: SignupSchema,
   })
-
+  
   // Login form
   const loginForm = useFormik({
     initialValues: {

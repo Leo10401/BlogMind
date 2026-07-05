@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://blog-mind.vercel.app
+
+# Sitemaps
+Sitemap: https://blog-mind.vercel.app/sitemap.xml
